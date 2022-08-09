@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "csignal": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "cwchar": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "numbers": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp"
+    }
+}
