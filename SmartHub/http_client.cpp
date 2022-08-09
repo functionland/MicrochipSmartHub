@@ -3,7 +3,7 @@
 #include "log/logger.h"
 
 #define SERVER_ADDRESS "127.0.0.1"
-#define SERVER_PORT 8000
+#define SERVER_PORT 8083
 #define CA_CERT_FILE "./ca-bundle.crt"
 
 static constexpr auto TAG{"HttpClient"};
@@ -29,7 +29,7 @@ bool HttpClient::NotifyConnection(std::string_view str)
     }
 
     std::string json = MxStr("{{ \"port\": \"{}\"}}", str);
-    if (auto res = client_->Post("/", json, "application/json"))
+    if (auto res = client_->Post("/notify", json, "application/json"))
     {
         if (res->status==200)
             LOG::Message(TAG, " Post notification Successfully sent");

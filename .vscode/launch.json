@@ -7,8 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
-            "program": "${workspaceFolder}/build/UsbDaemon",
+            "name": "SmartHub",
+            "program": "${workspaceFolder}/build/Smarthub/UsbDaemon",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "TestServer",
+            "program": "${workspaceFolder}/build/TestServer/TestServer",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
