@@ -4,7 +4,7 @@
 #define SMART_HUB_MANAGER_h
 
 #include <libusb-1.0/libusb.h>
-
+#include <vector>
 class SmartHubManager
 {
 public:
@@ -12,6 +12,10 @@ public:
     void setVidPid(uint16_t vid,uint16_t pid);
 
     bool Initilize();
+
+    bool RegisterRead(uint32_t address,uint16_t length,std::vector<uint8_t> &buffer);
+    bool RegisterWrite(uint32_t address,uint16_t length,const std::vector<uint8_t> &buffer);
+
      
 
 private:
@@ -22,6 +26,7 @@ private:
 
     uint16_t vid_;
     uint16_t pid_;
+    int last_error_code=0;
 };
 
 #endif // end SMART_HUB_MANAGER_h
