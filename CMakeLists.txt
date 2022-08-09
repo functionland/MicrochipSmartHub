@@ -14,8 +14,10 @@ find_path(CPP_HTTPLIB_INCLUDE_DIRS "httplib.h")
 set (SRC_PATH
                 main.cpp 
                 smart_hub_manager.cpp
+                http_client.cpp
                 log/logger.cpp
                 )
+
 add_executable(${PROJECT_NAME} ${SRC_PATH})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE usb-1.0)
