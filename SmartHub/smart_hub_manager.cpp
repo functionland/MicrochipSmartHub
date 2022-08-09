@@ -44,12 +44,12 @@ bool SmartHubManager::Initilize()
 
 bool SmartHubManager::RegisterRead(uint32_t address, uint16_t length, std::vector<uint8_t> &buffer)
 {
-    if(handle_==NULL)
+    if (handle_ == NULL)
     {
         LOG::Warn(TAG, "Handle is NULL");
         return false;
     }
-    
+
     uint8_t buf[1024] = "\0";
     if (length > 1024)
     {
@@ -79,24 +79,24 @@ bool SmartHubManager::RegisterRead(uint32_t address, uint16_t length, std::vecto
 }
 bool SmartHubManager::RegisterWrite(uint32_t address, uint16_t length, const std::vector<uint8_t> &buffer)
 {
-    if(handle_==NULL)
+    if (handle_ == NULL)
     {
         LOG::Warn(TAG, "Handle is NULL");
         return false;
     }
     uint8_t buf[1024] = "\0";
-    for(int i = 0; i < buffer.size(); i++)
-        buf[i]=buffer[i];
+    for (int i = 0; i < buffer.size(); i++)
+        buf[i] = buffer[i];
 
     last_error_code = libusb_control_transfer(handle_,
-                                       LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR |
-                                           LIBUSB_RECIPIENT_INTERFACE,
-                                       CMD_MEMORY_WRITE,
-                                       (address & 0xFFFF),
-                                       ((address & 0xFFFF0000) >> 16),
-                                       buf,
-                                       length,
-                                       CTRL_TIMEOUT);
+                                              LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR |
+                                                  LIBUSB_RECIPIENT_INTERFACE,
+                                              CMD_MEMORY_WRITE,
+                                              (address & 0xFFFF),
+                                              ((address & 0xFFFF0000) >> 16),
+                                              buf,
+                                              length,
+                                              CTRL_TIMEOUT);
     if (last_error_code < 0)
     {
         LOG::Warn(TAG, "Can not write register address {}", address);
@@ -109,4 +109,15 @@ void SmartHubManager::setVidPid(uint16_t vid, uint16_t pid)
 {
     vid_ = vid;
     pid_ = pid;
+}
+
+SmartHubManager::~SmartHubManager()
+{
+    if (handle_ != NULL)
+    {
+        libusb_close(handle_);
+        handle_ = NULL;
+    }
+
+    libusb_exit(ctx_);
 }

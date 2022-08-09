@@ -9,6 +9,7 @@ class SmartHubManager
 {
 public:
     SmartHubManager();
+    ~SmartHubManager();
     void setVidPid(uint16_t vid,uint16_t pid);
 
     bool Initilize();
