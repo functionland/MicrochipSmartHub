@@ -16,7 +16,6 @@ find_package(OpenSSL REQUIRED)
 
 set (SRC_PATH
                 main.cpp 
-                https_test_server.h
                 )
 
 add_executable(${PROJECT_NAME} ${SRC_PATH})
