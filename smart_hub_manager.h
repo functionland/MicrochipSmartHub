@@ -9,7 +9,7 @@ class SmartHubManager
 {
 public:
     SmartHubManager();
-    void setVidPid(int vid,int pid);
+    void setVidPid(uint16_t vid,uint16_t pid);
 
     bool Initilize();
      
@@ -20,8 +20,8 @@ private:
     // Context Variable used for initializing LibUSB session
     libusb_context *ctx_ = NULL;
 
-    int vid_;
-    int pid_;
+    uint16_t vid_;
+    uint16_t pid_;
 };
 
 #endif // end SMART_HUB_MANAGER_h

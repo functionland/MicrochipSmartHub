@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(spdlog CONFIG REQUIRED)
 find_path(CPP_HTTPLIB_INCLUDE_DIRS "httplib.h")
 
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
 
 set (SRC_PATH
                 main.cpp 
@@ -25,7 +27,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     spdlog::spdlog
     )
 target_include_directories(${PROJECT_NAME} PRIVATE ${CPP_HTTPLIB_INCLUDE_DIRS})
-
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL) 
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
