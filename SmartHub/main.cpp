@@ -16,8 +16,8 @@ LOG::Warn(TAG,"hello mohsen");
 HttpClient client;
 client.NotifyConnection("hello mohsen");
 
-usb.setVidPid(0x0424,0x7240);
-usb.Initilize();
+usb.SetVidPid(0x0424,0x7240);
+usb.Initialize();
 
 return 1;
 }
