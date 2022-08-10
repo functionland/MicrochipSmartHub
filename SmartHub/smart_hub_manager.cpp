@@ -57,7 +57,7 @@ bool SmartHubManager::Initialize() {
 bool SmartHubManager::RegisterRead(uint32_t address, uint16_t length,
                                    std::vector<uint8_t> &buffer) {
   if (handle_ == NULL) {
-    LOG::Warn(TAG, "Handle is NULL");
+    LOG::Warn(TAG, "RegisterRead Handle is NULL");
     return false;
   }
 
@@ -88,7 +88,7 @@ bool SmartHubManager::RegisterRead(uint32_t address, uint16_t length,
 bool SmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
                                     const std::vector<uint8_t> &buffer) {
   if (handle_ == NULL) {
-    LOG::Warn(TAG, "Handle is NULL");
+    LOG::Warn(TAG, "RegisterWrite Handle is NULL");
     return false;
   }
   uint8_t buf[1024] = "\0";
@@ -109,7 +109,7 @@ bool SmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
 
 bool SmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
   if (handle_ == NULL) {
-    LOG::Warn(TAG, "Handle is NULL");
+    LOG::Warn(TAG, "PortMappingUsb2 Handle is NULL");
     return false;
   }
 
@@ -182,9 +182,14 @@ bool SmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
               libusb_error_name(last_error_code));
     return false;
   }
+  return true;
 }
 
 bool SmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
+    if (handle_ == NULL) {
+    LOG::Warn(TAG, "PortMappingUsb3 Handle is NULL");
+    return false;
+  }
   std::vector<uint8_t> buffer(4);
   LOG::Message(TAG, "USB3.1 GEN2 Dynamic Port mapping");
 
@@ -258,7 +263,7 @@ bool SmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
     return false;
   }
 
-
+  return true;
 }
 void SmartHubManager::SetVidPid(uint16_t vid, uint16_t pid) {
   vid_ = vid;

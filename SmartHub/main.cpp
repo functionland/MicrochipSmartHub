@@ -19,5 +19,9 @@ client.NotifyConnection("hello mohsen");
 usb.SetVidPid(0x0424,0x7240);
 usb.Initialize();
 
+std::array<uint8_t, 7> port_map={0,0,0,0,
+                                 0,0,0};
+usb.PortMappingUsb2(port_map);
+
 return 1;
 }

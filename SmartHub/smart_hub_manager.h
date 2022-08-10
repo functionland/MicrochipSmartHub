@@ -5,6 +5,7 @@
 
 #include <libusb-1.0/libusb.h>
 #include <vector>
+#include <array>
 class SmartHubManager
 {
 public:
