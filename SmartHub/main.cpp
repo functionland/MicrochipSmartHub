@@ -1,13 +1,13 @@
 
 
-#include "smart_hub_manager.h"
+#include "usb_smart_hub_manager.h"
 #include "log/logger.h"
 #include "http_client.h"
 static constexpr auto TAG{"Main"};
 
 
 int main(){
-SmartHubManager usb;
+UsbSmartHubManager usb;
 
 std::string LOG_PATH=".";
 LOG::Init(LOG_PATH);

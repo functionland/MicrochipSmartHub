@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(UsbDaemon VERSION 0.1.0)
+project(MicrochipSmartHub VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
@@ -17,7 +17,8 @@ find_package(OpenSSL REQUIRED)
 
 set (SRC_PATH
                 main.cpp 
-                smart_hub_manager.cpp
+                usb_smart_hub_manager.cpp
+                i2c_smart_hub_manager.cpp
                 http_client.cpp
                 log/logger.cpp
                 )
