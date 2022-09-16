@@ -24,13 +24,6 @@ enum class CommandType : uint8_t {
 };
 
 
-enum class SpecialSmbusCommands : uint16_t {
-  CONFIG_REG_ACCESS ,//0X9937
-  USB_ATTACH , //0XAA55
-  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,//0XAA56
-  OTP_PROGRAM ,//0X9933
-  OTP_READ ,//0X9934
-};
 
 class ISmartHubManager {
  public:

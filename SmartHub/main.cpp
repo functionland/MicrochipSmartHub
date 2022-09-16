@@ -27,6 +27,7 @@ int main() {
   std::vector<uint8_t> buff;
   ishm.PreapareMessage(CommandType::WRITE, 2, 0xBF803000, buff);
   ishm.PreapareMessage(CommandType::READ, 2, 0xBF803000, buff);
+  ishm.PreapareSpecialMessage(SpecialSmbusCommands::CONFIG_REG_ACCESS, buff);
 
   return 1;
 }

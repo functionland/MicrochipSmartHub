@@ -125,4 +125,44 @@ void I2CSmartHubManager::PreapareMessage(CommandType type,
       return;
   }
 }
+void I2CSmartHubManager::PreapareSpecialMessage(SpecialSmbusCommands type,
+                                                std::vector<uint8_t> &buff) {
+  buff.clear();
+  switch (type) {
+    case SpecialSmbusCommands::CONFIG_REG_ACCESS:
+      buff.push_back(0x5A);
+      buff.push_back(0x99);
+      buff.push_back(0x37);
+      buff.push_back(0x00);
+      break;
+    case SpecialSmbusCommands::OTP_PROGRAM:
+      buff.push_back(0x5A);
+      buff.push_back(0x99);
+      buff.push_back(0x33);
+      buff.push_back(0x00);
+      break;
+    case SpecialSmbusCommands::OTP_READ:
+      buff.push_back(0x5A);
+      buff.push_back(0x99);
+      buff.push_back(0x34);
+      buff.push_back(0x00);
+      break;
+    case SpecialSmbusCommands::USB_ATTACH:
+      buff.push_back(0x5A);
+      buff.push_back(0xAA);
+      buff.push_back(0x55);
+      buff.push_back(0x00);
+      break;
+    case SpecialSmbusCommands::USB_ATTACH_WITH_SMB_RUNTIME_ACCESS:
+      buff.push_back(0x5A);
+      buff.push_back(0xAA);
+      buff.push_back(0x56);
+      buff.push_back(0x00);
+      break;
+
+    default:
+      break;
+  }
+}
+
 }  // namespace SmartHub
