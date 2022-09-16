@@ -37,11 +37,9 @@ static constexpr auto TAG{"UsbSmartHubManager"};
 
 UsbSmartHubManager::UsbSmartHubManager() {}
 
-bool UsbSmartHubManager::Initialize()
-{
+bool UsbSmartHubManager::Initialize() {
   int error = libusb_init(&ctx_);
-  if (error)
-  {
+  if (error) {
     LOG::Fatal(TAG, "Initialize failed {}{%s}", error,
                libusb_error_name(error));
     return false;
@@ -50,8 +48,7 @@ bool UsbSmartHubManager::Initialize()
   LOG::Message(TAG, "Open Usb with vid {0:#x} and pid {0:#x}", vid_, pid_);
 
   handle_ = libusb_open_device_with_vid_pid(ctx_, vid_, pid_);
-  if (handle_ == NULL)
-  {
+  if (handle_ == NULL) {
     LOG::Fatal(TAG, "Open device failed");
     libusb_exit(ctx_);
     return false;
@@ -61,22 +58,18 @@ bool UsbSmartHubManager::Initialize()
 }
 
 bool UsbSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
-                                      std::vector<uint8_t> &buffer)
-{
-  if (handle_ == NULL)
-  {
+                                      std::vector<uint8_t> &buffer) {
+  if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterRead Handle is NULL");
     return false;
   }
 
   uint8_t buf[1024] = "\0";
-  if (length > 1024)
-  {
+  if (length > 1024) {
     LOG::Warn(TAG, "Read length is too large {}", length);
     return false;
   }
-  for (int i = 0; i < length; i++)
-  {
+  for (int i = 0; i < length; i++) {
     buf[i] = buffer[i];
   }
   last_error_code = libusb_control_transfer(
@@ -85,29 +78,24 @@ bool UsbSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
           LIBUSB_RECIPIENT_INTERFACE,
       CMD_MEMORY_READ, (address & 0xFFFF), ((address & 0xFFFF0000) >> 16), buf,
       length, CTRL_TIMEOUT);
-  if (last_error_code < 0)
-  {
+  if (last_error_code < 0) {
     LOG::Warn(TAG, "Can not read register address {}", address);
     return false;
   }
 
-  for (uint16_t i = 1; i <= length; i++)
-  {
+  for (uint16_t i = 1; i <= length; i++) {
     buffer.push_back(buf[i]);
   }
   return true;
 }
 bool UsbSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
-                                       const std::vector<uint8_t> &buffer)
-{
-  if (handle_ == NULL)
-  {
+                                       const std::vector<uint8_t> &buffer) {
+  if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterWrite Handle is NULL");
     return false;
   }
   uint8_t buf[1024] = "\0";
-  for (int i = 0; i < buffer.size(); i++)
-    buf[i] = buffer[i];
+  for (int i = 0; i < buffer.size(); i++) buf[i] = buffer[i];
 
   last_error_code = libusb_control_transfer(
       handle_,
@@ -115,18 +103,15 @@ bool UsbSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
           LIBUSB_RECIPIENT_INTERFACE,
       CMD_MEMORY_WRITE, (address & 0xFFFF), ((address & 0xFFFF0000) >> 16), buf,
       length, CTRL_TIMEOUT);
-  if (last_error_code < 0)
-  {
+  if (last_error_code < 0) {
     LOG::Warn(TAG, "Can not write register address {}", address);
     return false;
   }
   return true;
 }
 
-bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
-{
-  if (handle_ == NULL)
-  {
+bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
+  if (handle_ == NULL) {
     LOG::Warn(TAG, "PortMappingUsb2 Handle is NULL");
     return false;
   }
@@ -136,8 +121,7 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
   LOG::Message(TAG, "USB2.0 Dynamic Port Mapping");
 
   LOG::Message(TAG, "Read 0xBF8030E8 register");
-  if (!RegisterRead(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer))
-  {
+  if (!RegisterRead(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer)) {
     LOG::Warn(TAG, "Port power status last error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -145,16 +129,14 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "Set bit 6 of 0xBF8030E8 register");
   buffer[0] |= DYNAMIC_PRT_REMAP_EN;
-  if (!RegisterWrite(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer))
-  {
+  if (!RegisterWrite(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer)) {
     LOG::Warn(TAG, "Port power status last error: {}",
               libusb_error_name(last_error_code));
     return false;
   }
 
   LOG::Message(TAG, "Set bit 3 (PRT_REMAP_EN) of XDATA register HUB_CFG_3");
-  if (!RegisterRead(HUB_CFG_3, 1, buffer))
-  {
+  if (!RegisterRead(HUB_CFG_3, 1, buffer)) {
     LOG::Warn(TAG, "Port power status last error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -162,8 +144,7 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "Set bit 3 of 0xBF803008 register");
   buffer[0] |= PRT_REMAP_EN;
-  if (!RegisterWrite(HUB_CFG_3, 1, buffer))
-  {
+  if (!RegisterWrite(HUB_CFG_3, 1, buffer)) {
     LOG::Warn(TAG, "Port power status last error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -183,16 +164,14 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
   // 0xBF8030FE
   final_port_map[3] = 0x00 + (port_map[6] & 0x0F);
 
-  if (!RegisterWrite(HUB_PRT_REMAP, 4, final_port_map))
-  {
+  if (!RegisterWrite(HUB_PRT_REMAP, 4, final_port_map)) {
     LOG::Warn(TAG, "Port power status last error: {}",
               libusb_error_name(last_error_code));
     return false;
   }
 
   LOG::Message(TAG, "Set bit 7 (CONFIG_DONE_DYNAMIC) of XDATA register");
-  if (!RegisterRead(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer))
-  {
+  if (!RegisterRead(PORT_PWR_STAT_UDC20_SLEEP_SUSPEND, 1, buffer)) {
     LOG::Warn(TAG,
               "Read bit 7 (CONFIG_DONE_DYNAMIC) of XDATA register error: {}",
               libusb_error_name(last_error_code));
@@ -201,8 +180,7 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "Set bit 7 of 0xBF8030E8 reg");
   buffer[0] |= CONFIG_DONE_DYNAMIC;
-  if (!RegisterWrite(HUB_CFG_3, 1, buffer))
-  {
+  if (!RegisterWrite(HUB_CFG_3, 1, buffer)) {
     LOG::Warn(TAG, "Register Write Failed.Error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -210,10 +188,8 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map)
   return true;
 }
 
-bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
-{
-  if (handle_ == NULL)
-  {
+bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
+  if (handle_ == NULL) {
     LOG::Warn(TAG, "PortMappingUsb3 Handle is NULL");
     return false;
   }
@@ -225,8 +201,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
       "Unlock/Clear Bit 0 of 0xBF80_3864 register (USB3_PRT_REMAP_REG_LOCK)");
 
   LOG::Message(TAG, "USB3 Reset unlock bit (Bit 0 of 0xBF803864 register)");
-  if (!RegisterRead(USB3_PRT_REMAP_REG_LOCK, 1, buffer))
-  {
+  if (!RegisterRead(USB3_PRT_REMAP_REG_LOCK, 1, buffer)) {
     LOG::Warn(TAG, "Reset unlock bit (Bit 0 of 0xBF803864 register) error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -234,8 +209,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "USB3 Set bit 7 of 0xBF8030E8 reg");
   buffer[0] |= ~USB3_PRT_REMAP_REG_LOCK_BIT;
-  if (!RegisterWrite(USB3_PRT_REMAP_REG_LOCK, 1, buffer))
-  {
+  if (!RegisterWrite(USB3_PRT_REMAP_REG_LOCK, 1, buffer)) {
     LOG::Warn(TAG, "Set bit 7 of 0xBF8030E8 reg error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -244,8 +218,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
   LOG::Message(
       TAG,
       "Set Bit 0 (USB3_PRT_REMAP_EN) of USB3_PRT_REMAP register (0xBF80_3858)");
-  if (!RegisterRead(USB3_PRT_REMAP_EN_REG, 1, buffer))
-  {
+  if (!RegisterRead(USB3_PRT_REMAP_EN_REG, 1, buffer)) {
     LOG::Warn(TAG, "Register Read Error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -253,8 +226,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "Set bit 0 (USB3_PRT_REMAP_EN)");
   buffer[0] |= USB3_PRT_REMAP_EN;
-  if (!RegisterWrite(USB3_PRT_REMAP_EN_REG, 1, buffer))
-  {
+  if (!RegisterWrite(USB3_PRT_REMAP_EN_REG, 1, buffer)) {
     LOG::Warn(TAG, "Register Write Error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -266,23 +238,22 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
 
   std::vector<uint8_t> final_port_map(4);
   final_port_map[0] =
-      ((port_map[1] << 4) + (port_map[0] & 0x0F)); // 0xBF803860
+      ((port_map[1] << 4) + (port_map[0] & 0x0F));  // 0xBF803860
   final_port_map[1] =
-      ((port_map[3] << 4) + (port_map[2] & 0x0F)); // 0xBF803861
+      ((port_map[3] << 4) + (port_map[2] & 0x0F));  // 0xBF803861
   final_port_map[2] =
-      ((port_map[5] << 4) + (port_map[4] & 0x0F)); // 0xBF803862
-  final_port_map[3] = 0x00 + (port_map[6] & 0x0F); // 0xBF803863
+      ((port_map[5] << 4) + (port_map[4] & 0x0F));  // 0xBF803862
+  final_port_map[3] = 0x00 + (port_map[6] & 0x0F);  // 0xBF803863
 
-  if (!RegisterWrite(USB3_NUMBER_OF_PORTS, 4, final_port_map))
-  {
+  if (!RegisterWrite(USB3_NUMBER_OF_PORTS, 4, final_port_map)) {
     LOG::Warn(TAG, "Register Write Error: {}",
               libusb_error_name(last_error_code));
     return false;
   }
 
-  LOG::Message(TAG, "Lock/Set Bit 0 of 0xBF80_3864 register (USB3_PRT_REMAP_REG_LOCK)");
-  if (!RegisterRead(USB3_PRT_REMAP_REG_LOCK, 1, buffer))
-  {
+  LOG::Message(
+      TAG, "Lock/Set Bit 0 of 0xBF80_3864 register (USB3_PRT_REMAP_REG_LOCK)");
+  if (!RegisterRead(USB3_PRT_REMAP_REG_LOCK, 1, buffer)) {
     LOG::Warn(TAG, "Register Read Error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -290,8 +261,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
 
   LOG::Message(TAG, "Set the lock bit (Bit 0 of 0xBF803864 register)");
   buffer[0] |= USB3_PRT_REMAP_REG_LOCK_BIT;
-  if (!RegisterWrite(USB3_PRT_REMAP_REG_LOCK, 1, buffer))
-  {
+  if (!RegisterWrite(USB3_PRT_REMAP_REG_LOCK, 1, buffer)) {
     LOG::Warn(TAG, "Register Write Error: {}",
               libusb_error_name(last_error_code));
     return false;
@@ -300,10 +270,8 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map)
   return true;
 }
 
-bool UsbSmartHubManager::Reset()
-{
-  if (handle_ == NULL)
-  {
+bool UsbSmartHubManager::Reset() {
+  if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterWrite Handle is NULL");
     return false;
   }
@@ -311,37 +279,28 @@ bool UsbSmartHubManager::Reset()
       handle_,
       LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR |
           LIBUSB_RECIPIENT_INTERFACE,
-      CMD_DEV_RESET,
-      DEVICE_RESET,
-      0,
-      0,
-      0,
-      CTRL_TIMEOUT);
-  if (last_error_code < 0)
-  {
-    LOG::Warn(TAG, "Can not write register address {}", libusb_error_name(last_error_code));
+      CMD_DEV_RESET, DEVICE_RESET, 0, 0, 0, CTRL_TIMEOUT);
+  if (last_error_code < 0) {
+    LOG::Warn(TAG, "Can not write register address {}",
+              libusb_error_name(last_error_code));
     return false;
   }
   return true;
 }
 
-void UsbSmartHubManager::SetVidPid(uint16_t vid, uint16_t pid)
-{
+void UsbSmartHubManager::SetVidPid(uint16_t vid, uint16_t pid) {
   vid_ = vid;
   pid_ = pid;
   CloseEverything();
   Initialize();
 }
 
-bool UsbSmartHubManager::CloseEverything()
-{
-  if (handle_ != NULL)
-  {
+bool UsbSmartHubManager::CloseEverything() {
+  if (handle_ != NULL) {
     libusb_close(handle_);
     handle_ = NULL;
   }
-  if (ctx_ != NULL)
-  {
+  if (ctx_ != NULL) {
     libusb_exit(ctx_);
     ctx_ = NULL;
   }

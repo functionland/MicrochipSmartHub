@@ -64,5 +64,6 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp"
-    }
+    },
+    "C_Cpp.clang_format_fallbackStyle": "Google"
 }
