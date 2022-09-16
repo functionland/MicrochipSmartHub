@@ -14,6 +14,7 @@ find_path(CPP_HTTPLIB_INCLUDE_DIRS "httplib.h")
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
+#find_package(libi2c REQUIRED)
 
 set (SRC_PATH
                 main.cpp 
@@ -32,6 +33,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE ${CPP_HTTPLIB_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL) 
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
+target_link_libraries(${PROJECT_NAME} PRIVATE i2c)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

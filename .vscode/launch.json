@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "SmartHub",
-            "program": "${workspaceFolder}/build/Smarthub/UsbDaemon",
+            "program": "${workspaceFolder}/build/SmartHub/MicrochipSmartHub",
             "args": [],
             "cwd": "${workspaceFolder}"
         },

@@ -8,14 +8,13 @@
 #include <httplib.h>
 #include <memory.h>
 
-class HttpClient
-{
-public:
-    HttpClient();
-    bool NotifyConnection(std::string_view str);
+class HttpClient {
+ public:
+  HttpClient();
+  bool NotifyConnection(std::string_view str);
 
-private:
-    std::shared_ptr<httplib::Client> client_;
+ private:
+  std::shared_ptr<httplib::Client> client_;
 };
 
-#endif // HTTP_CLIENT_H
+#endif  // HTTP_CLIENT_H
