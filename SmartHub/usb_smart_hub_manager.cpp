@@ -35,7 +35,7 @@
 
 static constexpr auto TAG{"UsbSmartHubManager"};
 
-UsbSmartHubManager::UsbSmartHubManager() {}
+UsbSmartHubManager::UsbSmartHubManager() : SmartHubManager() {}
 
 bool UsbSmartHubManager::Initialize() {
   int error = libusb_init(&ctx_);

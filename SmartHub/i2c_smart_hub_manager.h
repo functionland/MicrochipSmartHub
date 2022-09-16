@@ -1,6 +1,6 @@
 
-#ifndef USB_SMART_HUB_MANAGER_H
-#define USB_SMART_HUB_MANAGER_H
+#ifndef I2C_SMART_HUB_MANAGER_H
+#define I2C_SMART_HUB_MANAGER_H
 
 #include "smart_hub_manager.h"
 
@@ -35,4 +35,4 @@ class I2CSmartHubManager : public SmartHubManager {
   const int i2c_address_;
   int file_handle_{0};
 };
-#endif  // USB_SMART_HUB_MANAGER_H
+#endif  // I2C_SMART_HUB_MANAGER_H

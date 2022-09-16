@@ -13,7 +13,7 @@ extern "C" {
 static constexpr auto TAG{"I2cSmartHubManager"};
 
 I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
-    : port_path_{port_path}, i2c_address_{i2c_address} {}
+    : SmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
 bool I2CSmartHubManager::Initialize() {
   file_handle_ = open(port_path_.c_str(), O_RDWR);
@@ -106,7 +106,7 @@ void I2CSmartHubManager::PreapareMessage(SmartHubCommandType type,
       break;
 
     default:
-      LOG::Warn(TAG, "Unhaandled Command Type : {}", type);
+      LOG::Warn(TAG, "Unhaandled Command Type : {}", static_cast<int>(type));
       return;
   }
 }
