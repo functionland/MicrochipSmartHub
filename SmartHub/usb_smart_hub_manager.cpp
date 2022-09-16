@@ -35,7 +35,9 @@
 
 static constexpr auto TAG{"UsbSmartHubManager"};
 
-UsbSmartHubManager::UsbSmartHubManager() : SmartHubManager() {}
+namespace SmartHub{
+
+UsbSmartHubManager::UsbSmartHubManager() : ISmartHubManager() {}
 
 bool UsbSmartHubManager::Initialize() {
   int error = libusb_init(&ctx_);
@@ -308,3 +310,4 @@ bool UsbSmartHubManager::CloseEverything() {
 }
 
 UsbSmartHubManager::~UsbSmartHubManager() { CloseEverything(); }
+}

@@ -6,8 +6,8 @@
 #include <libusb-1.0/libusb.h>
 
 #include "smart_hub_manager.h"
-
-class UsbSmartHubManager : public SmartHubManager {
+namespace SmartHub {
+class UsbSmartHubManager : public ISmartHubManager {
  public:
   UsbSmartHubManager();
   ~UsbSmartHubManager();
@@ -42,5 +42,5 @@ class UsbSmartHubManager : public SmartHubManager {
   uint16_t pid_ = 0x7240;
   int last_error_code = 0;
 };
-
+}  // namespace SmartHub
 #endif  // end USB_SMART_HUB_MANAGER_H

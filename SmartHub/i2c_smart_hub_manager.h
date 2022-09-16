@@ -3,8 +3,8 @@
 #define I2C_SMART_HUB_MANAGER_H
 
 #include "smart_hub_manager.h"
-
-class I2CSmartHubManager : public SmartHubManager {
+namespace SmartHub{
+class I2CSmartHubManager : public ISmartHubManager {
  public:
   I2CSmartHubManager(std::string &port_path, int i2c_address);
   ~I2CSmartHubManager() = default;
@@ -23,10 +23,11 @@ class I2CSmartHubManager : public SmartHubManager {
 
   bool CloseEverything() override;
 
- protected:
-  void PreapareMessage(SmartHubCommandType type, uint8_t total_bytes_loaded,
+  void PreapareMessage(CommandType type, uint8_t total_bytes_loaded,
                        uint32_t reg_addr, std::vector<uint8_t> &buff);
+  
 
+ protected:
   bool WriteSmbus(uint8_t reg, std::vector<uint8_t> &buff);
   bool ReadSmbus(uint8_t reg, std::vector<uint8_t> &buff);
 
@@ -35,4 +36,5 @@ class I2CSmartHubManager : public SmartHubManager {
   const int i2c_address_;
   int file_handle_{0};
 };
+}
 #endif  // I2C_SMART_HUB_MANAGER_H

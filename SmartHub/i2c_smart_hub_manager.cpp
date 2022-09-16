@@ -11,9 +11,9 @@ extern "C" {
 #include <unistd.h> /* For open(), creat() */
 
 static constexpr auto TAG{"I2cSmartHubManager"};
-
+namespace SmartHub {
 I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
-    : SmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
+    : ISmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
 bool I2CSmartHubManager::Initialize() {
   file_handle_ = open(port_path_.c_str(), O_RDWR);
@@ -79,13 +79,13 @@ bool I2CSmartHubManager::ReadSmbus(uint8_t reg, std::vector<uint8_t> &buff) {
   return true;
 }
 
-void I2CSmartHubManager::PreapareMessage(SmartHubCommandType type,
+void I2CSmartHubManager::PreapareMessage(CommandType type,
                                          uint8_t total_bytes_loaded,
                                          uint32_t reg_addr,
                                          std::vector<uint8_t> &buff) {
   buff.clear();
   switch (type) {
-    case SmartHubCommandType::WRITE:
+    case CommandType::WRITE:
       buff.push_back(0x5A);
       buff.push_back(0x00);                    // byte 1
       buff.push_back(0x00);                    // byte 2
@@ -94,8 +94,17 @@ void I2CSmartHubManager::PreapareMessage(SmartHubCommandType type,
       // byte 5 Input the total number of consecutive bytes to write
       // (i.e: total number of consecutive registers to modify)
       buff.push_back(total_bytes_loaded);  // byte 5 Register Data Length
+
+      // byte 6-9
+      buff.push_back((uint8_t)(reg_addr >> 24));
+      buff.push_back((uint8_t)(reg_addr >> 16));
+      buff.push_back((uint8_t)(reg_addr >> 8));
+      buff.push_back((uint8_t)(reg_addr));
+      // for byte 10-136
+      // Up to 128 Bytes of Data payload. Must match the value present in Byte 5
+      // and the value present in Byte 3 minus six (6).
       break;
-    case SmartHubCommandType::READ:
+    case CommandType::READ:
       buff.push_back(0x5B);  // byte 0
       buff.push_back(0x00);  // byte 1
       buff.push_back(0x06);  // byte 2
@@ -103,6 +112,12 @@ void I2CSmartHubManager::PreapareMessage(SmartHubCommandType type,
       buff.push_back(0x01);  // byte 4 transaction type
       // byte 5 This is a “don’t care.” Hub will always return 128 bytes
       // of data per read instruction.
+      buff.push_back(0x80);  // byte 5 128=0x80
+      // byte 6-9
+      buff.push_back((uint8_t)(reg_addr >> 24));
+      buff.push_back((uint8_t)(reg_addr >> 16));
+      buff.push_back((uint8_t)(reg_addr >> 8));
+      buff.push_back((uint8_t)(reg_addr));
       break;
 
     default:
@@ -110,3 +125,4 @@ void I2CSmartHubManager::PreapareMessage(SmartHubCommandType type,
       return;
   }
 }
+}  // namespace SmartHub

@@ -12,7 +12,8 @@ sudo apt install libusb-1.0-0-dev i2c-tools libssl-dev libi2c-dev
 
 
 #build project
-cmake -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
+make -j4
 
 
 #generating digital signiture for https

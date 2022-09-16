@@ -7,7 +7,8 @@
 #include <string>
 #include <vector>
 
-enum class SmartHubStatus {
+namespace SmartHub{
+enum class Stages {
   SPI_INIT,
   CFG_ROM,
   CFG_STRAP,
@@ -17,12 +18,21 @@ enum class SmartHubStatus {
   NORMAL_MODE,
   UNKNOWN_MODE,
 };
-enum class SmartHubCommandType : uint8_t {
+enum class CommandType : uint8_t {
   READ,
   WRITE,
 };
 
-class SmartHubManager {
+
+enum class SpecialSmbusCommands : uint16_t {
+  CONFIG_REG_ACCESS ,//0X9937
+  USB_ATTACH , //0XAA55
+  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,//0XAA56
+  OTP_PROGRAM ,//0X9933
+  OTP_READ ,//0X9934
+};
+
+class ISmartHubManager {
  public:
   virtual bool Initialize() = 0;
 
@@ -40,5 +50,6 @@ class SmartHubManager {
 
   // virtual SmartHubStatus CurrentStatus()=0;
 };
+}
 
 #endif  // end of SMART_HUB_MANAGER_H
