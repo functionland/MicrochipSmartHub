@@ -1,6 +1,8 @@
 
 
 #include "usb_smart_hub_manager.h"
+#include "i2c_smart_hub_manager.h"
+
 #include "log/logger.h"
 #include "http_client.h"
 static constexpr auto TAG{"Main"};

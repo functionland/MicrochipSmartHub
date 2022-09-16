@@ -3,25 +3,32 @@
 #ifndef USB_SMART_HUB_MANAGER_H
 #define USB_SMART_HUB_MANAGER_H
 
+#include "smart_hub_manager.h"
+
 #include <libusb-1.0/libusb.h>
-#include <vector>
-#include <array>
-class UsbSmartHubManager
+
+class UsbSmartHubManager:public SmartHubManager
 {
 public:
     UsbSmartHubManager();
     ~UsbSmartHubManager();
     void SetVidPid(uint16_t vid,uint16_t pid);
 
-    bool Initialize();
+    bool Initialize() override;
 
-    bool RegisterRead(uint32_t address,uint16_t length,std::vector<uint8_t> &buffer);
-    bool RegisterWrite(uint32_t address,uint16_t length,const std::vector<uint8_t> &buffer);
+    bool RegisterRead(uint32_t address,uint16_t length,std::vector<uint8_t> &buffer)override;
+    bool RegisterWrite(uint32_t address,uint16_t length,const std::vector<uint8_t> &buffer)override;
 
-    bool PortMappingUsb2(std::array<uint8_t,7> port_map);
-    bool PortMappingUsb3(std::array<uint8_t,7> port_map);
+    bool PortMappingUsb2(std::array<uint8_t,7> port_map)override;
+    bool PortMappingUsb3(std::array<uint8_t,7> port_map)override;
 
-    bool CloseEverything();
+    /// @brief  Reset SmartHub from usb PC0
+    /// • Only one device can be accessed at a time
+    /// • No support is provided when multiple HFCs with same VID and PID are present
+    /// @return true if successfull
+    bool Reset()override;
+
+    bool CloseEverything()override;
 
 private:
     // libusb variables
