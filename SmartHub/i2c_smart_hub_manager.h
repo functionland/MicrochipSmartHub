@@ -48,7 +48,7 @@ class I2CSmartHubManager : public ISmartHubManager {
   uint16_t RetrieveID();
   uint32_t RetrieveConfiguration();
   int SetUpstreamPort(uint8_t port);
-  int SetUsbVID();
+  int SetUsbVID(uint8_t usb_vid1,uint8_t usb_vid2);
   uint16_t RetrieveUsbVID();
   int IsPortActive(uint8_t port);
   int IsPortEnabled(uint8_t port);

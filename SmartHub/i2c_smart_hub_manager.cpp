@@ -1,11 +1,13 @@
 #include "i2c_smart_hub_manager.h"
 
 #include "log/logger.h"
+
 // for aceesing smbus port on linux
 extern "C" {
 #include <i2c/smbus.h>
 #include <linux/i2c-dev.h>
 }
+#include <errno.h>
 #include <fcntl.h> /* For O_RDWR */
 #include <sys/ioctl.h>
 #include <unistd.h> /* For open(), creat() */
@@ -21,7 +23,8 @@ I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
 bool I2CSmartHubManager::Initialize() {
   file_handle_ = open(port_path_.c_str(), O_RDWR);
   if (file_handle_ < 0) {
-    LOG::Warn(TAG, "Can not open i2c path {}", port_path_);
+    LOG::Warn(TAG, "Can not open i2c path {} with err:", port_path_,
+              strerror(errno));
     return false;
   }
 
@@ -101,11 +104,11 @@ bool I2CSmartHubManager::CloseEverything() {
 bool I2CSmartHubManager::WriteSmbus(std::vector<uint8_t> &buff) {
   __u8 wbuf[256];
   for (int i = 1; i < buff.size(); i++) wbuf[i] = buff[i];
-  wbuf[buff.size() - 1] = '\0';
+  wbuf[buff.size()] = '\0';
   const auto res =
       i2c_smbus_write_block_data(file_handle_, 0x5A, buff.size(), wbuf);
   if (res < 0) {
-    LOG::Warn(TAG, "Can not write to reg:{} ", 0x5A);
+    LOG::Warn(TAG, "Can not write to reg with error {} ", strerror(errno));
     return false;
   }
   return true;
@@ -115,7 +118,7 @@ bool I2CSmartHubManager::ReadSmbus(std::vector<uint8_t> &buff) {
   /* Using SMBus commands */
   const auto res = i2c_smbus_read_block_data(file_handle_, 0x5B, rbuf);
   if (res < 0) {
-    LOG::Warn(TAG, "Can not read from reg:{}", 0x5B);
+    LOG::Warn(TAG, "Can not read from reg with error {} ", strerror(errno));
     return false;
   }
 
@@ -265,16 +268,98 @@ uint32_t I2CSmartHubManager::RetrieveConfiguration() {
   return data;
 }
 int I2CSmartHubManager::SetUpstreamPort(uint8_t port) {
-  if(!RegisterWrite(USB7252C_HUB_CFG, 1, {port}))
-  {
+  if (!RegisterWrite(USB7252C_HUB_CFG, 1, {port})) {
     return -1;
   }
   return 1;
 }
-int I2CSmartHubManager::SetUsbVID() {}
-uint16_t I2CSmartHubManager::RetrieveUsbVID() {}
-int I2CSmartHubManager::IsPortActive(uint8_t port) {}
-int I2CSmartHubManager::IsPortEnabled(uint8_t port) {}
+int I2CSmartHubManager::SetUsbVID(uint8_t vid1, uint8_t vid2) {
+  if (!RegisterWrite(USB7252C_VENDOR_ID, 1, {vid1, vid2})) {
+    return -1;
+  }
+  return 1;
+}
+
+static char *_link_state_to_string(uint8_t state) {
+  switch (state) {
+    case 0x00:
+      return "normal";
+    case 0x01:
+      return "sleep";
+    case 0x02:
+      return "suspend";
+    case 0x03:
+      return "off";
+    default:
+      break;
+  };
+  return "invalid";
+}
+
+uint16_t I2CSmartHubManager::RetrieveUsbVID() {
+  std::vector<uint8_t> buff;
+  if (!RegisterRead(USB7252C_VENDOR_ID, 2, buff)) {
+    return -1;
+  }
+  uint16_t vid = (uint16_t)(buff[2] << 8) + buff[1];
+
+  if (vid != VENDOR_ID_MICROCHIP) {
+    LOG::Error(TAG, "Expect MicroChip Vendor ID (=0x%.4X) , got 0x%.4X",
+               VENDOR_ID_MICROCHIP, vid);
+  }
+
+  return vid;
+}
+int I2CSmartHubManager::IsPortActive(uint8_t port) {
+  std::vector<uint8_t> buff;
+  if (!RegisterRead((port < 4) ? USB7252C_USB2_LINK_STATE0_3
+                               : USB7252C_USB2_LINK_STATE4_7,
+                    2, buff)) {
+    return -1;
+  }
+  int portstat = buff[1];
+
+  /* Temporary debug output... */
+  LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 0 : 4,
+             _link_state_to_string(portstat & 0x3));
+  LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 1 : 5,
+             _link_state_to_string((portstat & 0xC) >> 2));
+  LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 2 : 6,
+             _link_state_to_string((portstat & 0x30) >> 4));
+  LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 3 : 7,
+             _link_state_to_string((portstat & 0xC0) >> 6));
+  /* End of ugly debug output */
+
+  return portstat;
+}
+int I2CSmartHubManager::IsPortEnabled(uint8_t port) {
+  /*
+   * Bit 7 = 1; PHYSICAL Port 7 is disabled.
+   * Bit 6 = 1; PHYSICAL Port 6 is disabled.
+   * Bit 5 = 1; PHYSICAL Port 5 is disabled.
+   * Bit 4 = 1; PHYSICAL Port 4 is disabled.
+   * Bit 3 = 1; PHYSICAL Port 3 is disabled.
+   * Bit 2 = 1; PHYSICAL Port 2 is disabled.
+   * Bit 1 = 1; PHYSICAL Port 1 is disabled.
+   * Bit 0 = Reserved, always = ‘0’
+   */
+
+  std::vector<uint8_t> buff;
+  if (!RegisterRead(USB7252C_PORT_DIS_SELF, 2, buff)) {
+    return -1;
+  }
+  LOG::Debug(TAG, "Port Disable Self-Powered: 0x%x, return value: %d", buff[1],
+             0);
+
+  if (!RegisterRead(USB7252C_PORT_DIS_BUS, 2, buff)) {
+    return -1;
+  }
+
+  LOG::Debug(TAG, "Port Disable Bus-Powered: 0x%x, return value: %d", buff[1],
+             0);
+
+  return 0;
+}
 int I2CSmartHubManager::DisablePort(uint8_t port) {}
 int I2CSmartHubManager::SetFlexFeatureRegisters(uint8_t *value) {}
 uint16_t I2CSmartHubManager::GetFlexFeatureRegisters() {}

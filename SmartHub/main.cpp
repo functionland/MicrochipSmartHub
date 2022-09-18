@@ -22,8 +22,10 @@ int main() {
   //   std::array<uint8_t, 7> port_map = {0, 0, 0, 0, 0, 0, 0};
   //   usb.PortMappingUsb2(port_map);
 
-  std::string port_path = "/dev/i2c0";
+  std::string port_path = "/dev/i2c-9";
   I2CSmartHubManager i2c_sm(port_path, 0x2D);
+  i2c_sm.Initialize();
+  auto id=i2c_sm.RetrieveID();
   std::vector<uint8_t> buff;
   std::vector<uint8_t> data={0xBF,0xDF};
 
