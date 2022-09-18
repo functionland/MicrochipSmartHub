@@ -3,13 +3,15 @@
 #define I2C_SMART_HUB_MANAGER_H
 
 #include "smart_hub_manager.h"
+#include "utility.h"
 namespace SmartHub {
+
 enum class SpecialSmbusCommands : uint16_t {
-  CONFIG_REG_ACCESS,                   // 0X9937
-  USB_ATTACH,                          // 0XAA55
-  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,  // 0XAA56
-  OTP_PROGRAM,                         // 0X9933
-  OTP_READ,                            // 0X9934
+  CONFIG_REG_ACCESS,                   // 0X9937  Run memory command
+  USB_ATTACH,                          // 0XAA55  Go to runtime without SMBus
+  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,  // 0XAA56  Go to runtime with SMBus
+  OTP_PROGRAM,  // 0X9933  Permanently program configuration commands to the OTP
+  OTP_READ,     // 0X9934  Read the values of the OTP register
 };
 class I2CSmartHubManager : public ISmartHubManager {
  public:
@@ -30,11 +32,12 @@ class I2CSmartHubManager : public ISmartHubManager {
 
   bool CloseEverything() override;
 
-  void PreapareMessage(CommandType type, uint8_t total_bytes_loaded,
-                       uint32_t reg_addr, std::vector<uint8_t> &buff);
+  void PrepareMessage(CommandType type, uint8_t total_bytes_loaded,
+                      uint32_t reg_addr, std::vector<uint8_t> &data,
+                      std::vector<uint8_t> &buff);
 
-  void PreapareSpecialMessage(SpecialSmbusCommands type,
-                              std::vector<uint8_t> &buff);
+  void PrepareSpecialMessage(SpecialSmbusCommands type,
+                             std::vector<uint8_t> &buff);
 
  protected:
   bool WriteSmbus(uint8_t reg, std::vector<uint8_t> &buff);
@@ -42,8 +45,9 @@ class I2CSmartHubManager : public ISmartHubManager {
 
  private:
   std::string port_path_;
-  const int i2c_address_;
+  const int i2c_address_ = 0x2D;
   int file_handle_{0};
+  uint8_t register_write_[9];
 };
 }  // namespace SmartHub
 #endif  // I2C_SMART_HUB_MANAGER_H

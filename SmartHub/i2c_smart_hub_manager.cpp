@@ -10,7 +10,10 @@ extern "C" {
 #include <sys/ioctl.h>
 #include <unistd.h> /* For open(), creat() */
 
+#include "smart_hub_regs_cmd.h"
+
 static constexpr auto TAG{"I2cSmartHubManager"};
+
 namespace SmartHub {
 I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
     : ISmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
@@ -79,18 +82,18 @@ bool I2CSmartHubManager::ReadSmbus(uint8_t reg, std::vector<uint8_t> &buff) {
   return true;
 }
 
-void I2CSmartHubManager::PreapareMessage(CommandType type,
-                                         uint8_t total_bytes_loaded,
-                                         uint32_t reg_addr,
-                                         std::vector<uint8_t> &buff) {
+void I2CSmartHubManager::PrepareMessage(CommandType type,
+                                        uint8_t total_bytes_loaded,
+                                        uint32_t reg_addr,
+                                        std::vector<uint8_t> &data,
+                                        std::vector<uint8_t> &buff) {
   buff.clear();
   switch (type) {
     case CommandType::WRITE:
-      buff.push_back(0x5A);
       buff.push_back(0x00);                    // byte 1
       buff.push_back(0x00);                    // byte 2
       buff.push_back(total_bytes_loaded + 6);  // byte 3
-      buff.push_back(0x00);                    // byte 4 transaction type
+      buff.push_back(0x00);  // byte 4 transaction type 0x00 for write
       // byte 5 Input the total number of consecutive bytes to write
       // (i.e: total number of consecutive registers to modify)
       buff.push_back(total_bytes_loaded);  // byte 5 Register Data Length
@@ -100,16 +103,19 @@ void I2CSmartHubManager::PreapareMessage(CommandType type,
       buff.push_back((uint8_t)(reg_addr >> 16));
       buff.push_back((uint8_t)(reg_addr >> 8));
       buff.push_back((uint8_t)(reg_addr));
+      for(auto &a:data){
+        buff.push_back(a);
+      }
+      LOG::Debug(TAG,"Write SMBus ");
       // for byte 10-136
       // Up to 128 Bytes of Data payload. Must match the value present in Byte 5
       // and the value present in Byte 3 minus six (6).
       break;
     case CommandType::READ:
-      buff.push_back(0x5B);  // byte 0
       buff.push_back(0x00);  // byte 1
       buff.push_back(0x06);  // byte 2
       buff.push_back(0x6A);  // byte 3
-      buff.push_back(0x01);  // byte 4 transaction type
+      buff.push_back(0x01);  // byte 4 transaction type 0x01 for read
       // byte 5 This is a “don’t care.” Hub will always return 128 bytes
       // of data per read instruction.
       buff.push_back(0x80);  // byte 5 128=0x80
@@ -118,6 +124,8 @@ void I2CSmartHubManager::PreapareMessage(CommandType type,
       buff.push_back((uint8_t)(reg_addr >> 16));
       buff.push_back((uint8_t)(reg_addr >> 8));
       buff.push_back((uint8_t)(reg_addr));
+
+      LOG::Debug(TAG,"Read SMBus ");
       break;
 
     default:
@@ -125,36 +133,32 @@ void I2CSmartHubManager::PreapareMessage(CommandType type,
       return;
   }
 }
-void I2CSmartHubManager::PreapareSpecialMessage(SpecialSmbusCommands type,
-                                                std::vector<uint8_t> &buff) {
+void I2CSmartHubManager::PrepareSpecialMessage(SpecialSmbusCommands type,
+                                               std::vector<uint8_t> &buff) {
   buff.clear();
+
   switch (type) {
     case SpecialSmbusCommands::CONFIG_REG_ACCESS:
-      buff.push_back(0x5A);
       buff.push_back(0x99);
       buff.push_back(0x37);
       buff.push_back(0x00);
       break;
     case SpecialSmbusCommands::OTP_PROGRAM:
-      buff.push_back(0x5A);
       buff.push_back(0x99);
       buff.push_back(0x33);
       buff.push_back(0x00);
       break;
     case SpecialSmbusCommands::OTP_READ:
-      buff.push_back(0x5A);
       buff.push_back(0x99);
       buff.push_back(0x34);
       buff.push_back(0x00);
       break;
     case SpecialSmbusCommands::USB_ATTACH:
-      buff.push_back(0x5A);
       buff.push_back(0xAA);
       buff.push_back(0x55);
       buff.push_back(0x00);
       break;
     case SpecialSmbusCommands::USB_ATTACH_WITH_SMB_RUNTIME_ACCESS:
-      buff.push_back(0x5A);
       buff.push_back(0xAA);
       buff.push_back(0x56);
       buff.push_back(0x00);
