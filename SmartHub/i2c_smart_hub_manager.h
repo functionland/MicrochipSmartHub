@@ -3,7 +3,7 @@
 #define I2C_SMART_HUB_MANAGER_H
 
 #include "smart_hub_manager.h"
-#include "utility.h"
+//#include "utility.h"
 namespace SmartHub {
 
 enum class SpecialSmbusCommands : uint16_t {
@@ -20,10 +20,21 @@ class I2CSmartHubManager : public ISmartHubManager {
 
   bool Initialize() override;
 
+  /// @brief Run the Read Configuration Register command sequence
+  /// @param address is Register to be read
+  /// @param length  Number of bytes that will be read
+  /// @param data vector which will hold the return value
+  /// @return true if successful
   bool RegisterRead(uint32_t address, uint16_t length,
-                    std::vector<uint8_t> &buffer) override;
+                    std::vector<uint8_t> &data) override;
+
+  /// @brief Run the Write Configuration Register command sequence
+  /// @param address Register to be written
+  /// @param length  Number of bytes that will be written
+  /// @param data vector which holds the data to be written
+  /// @return true if successfull
   bool RegisterWrite(uint32_t address, uint16_t length,
-                     const std::vector<uint8_t> &buffer) override;
+                     const std::vector<uint8_t> &data) override;
 
   bool PortMappingUsb2(std::array<uint8_t, 7> port_map) override;
   bool PortMappingUsb3(std::array<uint8_t, 7> port_map) override;
@@ -32,18 +43,37 @@ class I2CSmartHubManager : public ISmartHubManager {
 
   bool CloseEverything() override;
 
+  bool SendSpecialCmd(SpecialSmbusCommands cmd);
+  uint32_t RetrieveRevision();
+  uint16_t RetrieveID();
+  uint32_t RetrieveConfiguration();
+  int SetUpstreamPort(uint8_t port);
+  int SetUsbVID();
+  uint16_t RetrieveUsbVID();
+  int IsPortActive(uint8_t port);
+  int IsPortEnabled(uint8_t port);
+  int DisablePort(uint8_t port);
+  int SetFlexFeatureRegisters(uint8_t *value);
+  uint16_t GetFlexFeatureRegisters();
+  int SetPrimaryI2CAddressRegisters(uint8_t *address);
+  uint8_t GetPrimaryI2CAddressRegisters();
+  int SetSecondryI2CAddressRegisters(uint8_t *address);
+  uint8_t GetSecondryI2CAddressRegisters();
+  int SetGenericRegister(uint32_t reg, uint8_t * value, uint8_t count);
+  int GetGenericRegister(uint32_t reg, uint8_t * value, uint8_t count);
+
+ protected:
   void PrepareMessage(CommandType type, uint8_t total_bytes_loaded,
-                      uint32_t reg_addr, std::vector<uint8_t> &data,
+                      uint32_t reg_addr, const std::vector<uint8_t> &data,
                       std::vector<uint8_t> &buff);
 
   void PrepareSpecialMessage(SpecialSmbusCommands type,
                              std::vector<uint8_t> &buff);
-
- protected:
-  bool WriteSmbus(uint8_t reg, std::vector<uint8_t> &buff);
-  bool ReadSmbus(uint8_t reg, std::vector<uint8_t> &buff);
+  bool WriteSmbus(std::vector<uint8_t> &buff);
+  bool ReadSmbus(std::vector<uint8_t> &buff);
 
  private:
+  bool initialized_ = false;
   std::string port_path_;
   const int i2c_address_ = 0x2D;
   int file_handle_{0};

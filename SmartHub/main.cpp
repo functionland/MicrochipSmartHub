@@ -23,12 +23,9 @@ int main() {
   //   usb.PortMappingUsb2(port_map);
 
   std::string port_path = "/dev/i2c0";
-  I2CSmartHubManager ishm(port_path, 0x2D);
+  I2CSmartHubManager i2c_sm(port_path, 0x2D);
   std::vector<uint8_t> buff;
   std::vector<uint8_t> data={0xBF,0xDF};
-  ishm.PrepareMessage(CommandType::WRITE, 2, 0xBF803000,data, buff);
-  ishm.PrepareMessage(CommandType::READ, 2, 0xBF803000,data, buff);
-  ishm.PrepareSpecialMessage(SpecialSmbusCommands::CONFIG_REG_ACCESS, buff);
 
   return 1;
 }

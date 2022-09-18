@@ -20,7 +20,8 @@ enum class Stages {
 };
 enum class CommandType : uint8_t {
   READ,
-  WRITE,
+  WRITE_FOR_WRITE,
+  WRITE_FOR_READ,
 };
 
 
