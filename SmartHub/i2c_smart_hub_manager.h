@@ -48,19 +48,17 @@ class I2CSmartHubManager : public ISmartHubManager {
   uint16_t RetrieveID();
   uint32_t RetrieveConfiguration();
   int SetUpstreamPort(uint8_t port);
-  int SetUsbVID(uint8_t usb_vid1,uint8_t usb_vid2);
+  int SetUsbVID(uint8_t usb_vid1, uint8_t usb_vid2);
   uint16_t RetrieveUsbVID();
   int IsPortActive(uint8_t port);
   int IsPortEnabled(uint8_t port);
   int DisablePort(uint8_t port);
-  int SetFlexFeatureRegisters(uint8_t *value);
+  int SetFlexFeatureRegisters(uint16_t value);
   uint16_t GetFlexFeatureRegisters();
-  int SetPrimaryI2CAddressRegisters(uint8_t *address);
+  int SetPrimaryI2CAddressRegisters(uint16_t address);
   uint8_t GetPrimaryI2CAddressRegisters();
-  int SetSecondryI2CAddressRegisters(uint8_t *address);
+  int SetSecondryI2CAddressRegisters(uint16_t address);
   uint8_t GetSecondryI2CAddressRegisters();
-  int SetGenericRegister(uint32_t reg, uint8_t * value, uint8_t count);
-  int GetGenericRegister(uint32_t reg, uint8_t * value, uint8_t count);
 
  protected:
   void PrepareMessage(CommandType type, uint8_t total_bytes_loaded,

@@ -282,7 +282,7 @@ int I2CSmartHubManager::SetUsbVID(uint8_t vid1, uint8_t vid2) {
   return 1;
 }
 
-static char *_link_state_to_string(uint8_t state) {
+static std::string LinkStateToString(uint8_t state) {
   switch (state) {
     case 0x00:
       return "normal";
@@ -323,13 +323,13 @@ int I2CSmartHubManager::IsPortActive(uint8_t port) {
 
   /* Temporary debug output... */
   LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 0 : 4,
-             _link_state_to_string(portstat & 0x3));
+             LinkStateToString(portstat & 0x3));
   LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 1 : 5,
-             _link_state_to_string((portstat & 0xC) >> 2));
+             LinkStateToString((portstat & 0xC) >> 2));
   LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 2 : 6,
-             _link_state_to_string((portstat & 0x30) >> 4));
+             LinkStateToString((portstat & 0x30) >> 4));
   LOG::Debug(TAG, "Port %d: %s", (port < 4) ? 3 : 7,
-             _link_state_to_string((portstat & 0xC0) >> 6));
+             LinkStateToString((portstat & 0xC0) >> 6));
   /* End of ugly debug output */
 
   return portstat;
@@ -362,15 +362,55 @@ int I2CSmartHubManager::IsPortEnabled(uint8_t port) {
 
   return 0;
 }
-int I2CSmartHubManager::DisablePort(uint8_t port) {}
-int I2CSmartHubManager::SetFlexFeatureRegisters(uint8_t *value) {}
-uint16_t I2CSmartHubManager::GetFlexFeatureRegisters() {}
-int I2CSmartHubManager::SetPrimaryI2CAddressRegisters(uint8_t *address) {}
-uint8_t I2CSmartHubManager::GetPrimaryI2CAddressRegisters() {}
-int I2CSmartHubManager::SetSecondryI2CAddressRegisters(uint8_t *address) {}
-uint8_t I2CSmartHubManager::GetSecondryI2CAddressRegisters() {}
-int I2CSmartHubManager::SetGenericRegister(uint32_t reg, uint8_t *value,
-                                           uint8_t count) {}
-int I2CSmartHubManager::GetGenericRegister(uint32_t reg, uint8_t *value,
-                                           uint8_t count) {}
+int I2CSmartHubManager::DisablePort(uint8_t port) { return 0; }
+int I2CSmartHubManager::SetFlexFeatureRegisters(uint16_t value) {
+  std::vector<uint8_t> buff;
+  buff.push_back(value << 8);
+  buff.push_back(value);
+  if (!RegisterWrite(USB7252C_FLEX_FEATURE_REG, 1, buff)) {
+    return -1;
+  }
+  return 1;
+}
+uint16_t I2CSmartHubManager::GetFlexFeatureRegisters() {
+  std::vector<uint8_t> buff;
+  if (!RegisterRead(USB7252C_FLEX_FEATURE_REG, 2, buff)) {
+    return -1;
+  }
+  uint16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
+  return data;
+}
+int I2CSmartHubManager::SetPrimaryI2CAddressRegisters(uint16_t address) {
+  std::vector<uint8_t> buff;
+  buff.push_back(address << 8);
+  buff.push_back(address);
+  if (!RegisterWrite(USB7252C_SMBUS_PRIMAIRY_ADR, 1, buff)) {
+    return -1;
+  }
+  return 1;
+}
+uint8_t I2CSmartHubManager::GetPrimaryI2CAddressRegisters() {
+  std::vector<uint8_t> buff;
+  if (!RegisterRead(USB7252C_SMBUS_PRIMAIRY_ADR, 1, buff)) {
+    return -1;
+  }
+  return buff[1];
+}
+int I2CSmartHubManager::SetSecondryI2CAddressRegisters(uint16_t address) {
+  std::vector<uint8_t> buff;
+  buff.push_back(address << 8);
+  buff.push_back(address);
+  if (!RegisterWrite(USB7252C_SMBUS_SECOND_ADR, 1, buff)) {
+    return -1;
+  }
+  return 1;
+}
+uint8_t I2CSmartHubManager::GetSecondryI2CAddressRegisters() {
+  std::vector<uint8_t> buff;
+  if (!RegisterRead(USB7252C_SMBUS_SECOND_ADR, 1, buff)) {
+    return -1;
+  }
+  return buff[1];
+}
+
 }  // namespace SmartHub
