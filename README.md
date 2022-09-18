@@ -19,10 +19,16 @@ cd vcpkg && ./ bootstrap-vcpkg.sh
 ./vcpkg install cpp-httplib
 
 
-#build project
+# build project
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
 ninja
+./SmartHub/MicrochipSmartHub
 
+# For Testing i2c on pc with fake i2c
+sudo modprobe i2c-dev
+sudo modprobe i2c-stub chip_addr=0x2D
+i2cdetect -l
+sudo chmod 777 /dev/i2c-x //x is created i2c on device
 
 #generating digital signiture for https
 openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem

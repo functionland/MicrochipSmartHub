@@ -21,6 +21,8 @@ I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
     : ISmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
 bool I2CSmartHubManager::Initialize() {
+  if(initialized_)return true;
+
   file_handle_ = open(port_path_.c_str(), O_RDWR);
   if (file_handle_ < 0) {
     LOG::Warn(TAG, "Can not open i2c path {} with err:", port_path_,
@@ -99,10 +101,11 @@ bool I2CSmartHubManager::CloseEverything() {
     LOG::Warn(TAG, "Can not close i2c port");
     return false;
   }
+  initialized_=false;
   return true;
 }
 bool I2CSmartHubManager::WriteSmbus(std::vector<uint8_t> &buff) {
-  __u8 wbuf[256];
+  uint8_t wbuf[256];
   for (int i = 1; i < buff.size(); i++) wbuf[i] = buff[i];
   wbuf[buff.size()] = '\0';
   const auto res =
@@ -114,7 +117,7 @@ bool I2CSmartHubManager::WriteSmbus(std::vector<uint8_t> &buff) {
   return true;
 }
 bool I2CSmartHubManager::ReadSmbus(std::vector<uint8_t> &buff) {
-  __u8 rbuf[256];
+  uint8_t rbuf[256];
   /* Using SMBus commands */
   const auto res = i2c_smbus_read_block_data(file_handle_, 0x5B, rbuf);
   if (res < 0) {
