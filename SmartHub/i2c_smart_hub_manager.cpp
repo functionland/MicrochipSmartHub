@@ -132,6 +132,7 @@ void I2CSmartHubManager::PrepareMessage(CommandType type,
                                         const std::vector<uint8_t> &data,
                                         std::vector<uint8_t> &buff) {
   buff.clear();
+
   switch (type) {
     case CommandType::WRITE_FOR_WRITE:
       buff.push_back(0x00);                    // byte 1
@@ -191,6 +192,7 @@ void I2CSmartHubManager::PrepareMessage(CommandType type,
 
     default:
       LOG::Warn(TAG, "Unhaandled Command Type : {}", static_cast<int>(type));
+      buff.clear();
       return;
   }
 }

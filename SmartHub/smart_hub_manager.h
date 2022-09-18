@@ -8,15 +8,15 @@
 #include <vector>
 
 namespace SmartHub{
-enum class Stages {
-  SPI_INIT,
-  CFG_ROM,
-  CFG_STRAP,
-  SMBUS_CHECK,
-  CFG_OTP,
-  CFG_SOC,
-  NORMAL_MODE,
-  UNKNOWN_MODE,
+enum Stage {
+  STG_SPI_INIT,
+  STG_CFG_ROM,
+  STG_CFG_STRAP,
+  STG_SMBUS_CHECK,
+  STG_CFG_OTP,
+  STG_CFG_SOC,
+  STG_NORMAL_MODE,
+  STG_UNKNOWN_MODE,
 };
 enum class CommandType : uint8_t {
   READ,

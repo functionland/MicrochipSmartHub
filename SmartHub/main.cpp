@@ -4,10 +4,11 @@
 #include "i2c_smart_hub_manager.h"
 #include "log/logger.h"
 #include "usb_smart_hub_manager.h"
+#include "utility.h"
 static constexpr auto TAG{"Main"};
 using namespace SmartHub;
 int main() {
-  //UsbSmartHubManager usb;
+  // UsbSmartHubManager usb;
 
   std::string LOG_PATH = ".";
   LOG::Init(LOG_PATH);
