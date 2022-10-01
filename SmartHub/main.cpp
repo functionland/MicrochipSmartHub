@@ -3,13 +3,13 @@
 #include <thread>
 
 #include "http_client.h"
-#include "i2c_smart_hub_manager.h"
+#include "hub_controller_i2c.h"
 #include "log/logger.h"
 #include "utility.h"
 static constexpr auto TAG{"Main"};
 using namespace SmartHub;
 int main() {
-  // UsbSmartHubManager usb;
+  // UsbHubController usb;
 
   std::string LOG_PATH = ".";
   LOG::Init(LOG_PATH);
@@ -25,7 +25,7 @@ int main() {
   //   usb.PortMappingUsb2(port_map);
 
   std::string port_path = "/dev/i2c-8";
-  I2CSmartHubManager i2c_sm(port_path, 0x2D);
+  I2CHubController i2c_sm(port_path, 0x2D);
   std::thread([&]() {
     while (!i2c_sm.Initialize()) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
