@@ -8,7 +8,7 @@
 #define CA_CERT_FILE "./ca-bundle.crt"
 
 static constexpr auto TAG{"HttpClient"};
-
+namespace SmartHub {
 HttpClient::HttpClient() {
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
   client_ = std::make_shared<httplib::Client>(SERVER_ADDRESS, SERVER_PORT);
@@ -39,4 +39,5 @@ bool HttpClient::NotifyConnection(std::string_view str) {
   }
 
   return true;
+}
 }
