@@ -20,6 +20,7 @@ void HubManager::AddHubController(std::shared_ptr<IHubController> controller) {
 
 void HubManager::Worker(HubManager *manager) {
   LOG::Debug(TAG, "HUB Manager Is Starting ...");
+  
   while (manager->runnig_) {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
