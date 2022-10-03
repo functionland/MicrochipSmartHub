@@ -2,7 +2,7 @@
 
 #include <libusb-1.0/libusb.h>
 
-#include "smart_hub_manager.h"
+#include "hub_controller.h"
 namespace SmartHub {
 class UsbHubController : public IHubController {
  public:

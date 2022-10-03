@@ -37,7 +37,9 @@ class I2CHubController : public IHubController {
                      const std::vector<uint8_t> &data) override;
 
   bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) override;
-  bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) override;
+  uint8_t GetLogicalMapping(uint8_t phy_port);
+  bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) ;
+  UsbConfiguration GetPortConfiguration(uint8_t phy_port);
 
   bool Reset() override;
 

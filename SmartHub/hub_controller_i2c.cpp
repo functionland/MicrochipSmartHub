@@ -12,7 +12,7 @@ extern "C" {
 #include <sys/ioctl.h>
 #include <unistd.h> /* For open(), creat() */
 
-#include "smart_hub_regs_cmd.h"
+#include "smart_hub_regs.h"
 
 static constexpr auto TAG{"I2CHubController"};
 
@@ -93,9 +93,29 @@ bool I2CHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
                                          uint8_t logic_to) {
   return false;
 }
+uint8_t GetLogicalMapping(uint8_t phy_port) { return 0; }
+
 bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
                                             UsbConfiguration config) {
+  switch (config) {
+    case UsbConfiguration::USB_DOWNSTREAM:
+      if (!RegisterWrite(USB7252C_HUB_CFG, 1, {phy_port})) {
+        return false;
+      }
+      return true;
+    case UsbConfiguration::USB_UPSTREAM:
+      break;
+    case UsbConfiguration::USB_POWER_DELIVERY:
+      break;
+    case UsbConfiguration::USB_POWER_SAVING:
+      break;
+    default:
+      break;
+  }
   return false;
+}
+UsbConfiguration GetPortConfiguration(uint8_t phy_port) {
+  return UsbConfiguration::USB_DOWNSTREAM;
 }
 
 bool I2CHubController::Reset() { return false; }
@@ -278,12 +298,7 @@ uint32_t I2CHubController::RetrieveConfiguration() {
 
   return data;
 }
-int I2CHubController::SetUpstreamPort(uint8_t port) {
-  if (!RegisterWrite(USB7252C_HUB_CFG, 1, {port})) {
-    return -1;
-  }
-  return 1;
-}
+
 int I2CHubController::SetUsbVID(uint8_t vid1, uint8_t vid2) {
   if (!RegisterWrite(USB7252C_VENDOR_ID, 1, {vid1, vid2})) {
     return -1;
