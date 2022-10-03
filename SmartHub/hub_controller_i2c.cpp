@@ -89,12 +89,15 @@ bool I2CHubController::RegisterWrite(uint32_t address, uint16_t length,
   }
   return true;
 }
-bool I2CHubController::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
+bool I2CHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
+                                         uint8_t logic_to) {
   return false;
 }
-bool I2CHubController::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
+bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
+                                            UsbConfiguration config) {
   return false;
 }
+
 bool I2CHubController::Reset() { return false; }
 bool I2CHubController::CloseEverything() {
   if (close(file_handle_) < 0) {

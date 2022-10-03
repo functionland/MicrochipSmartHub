@@ -9,6 +9,16 @@
 #include "hub_controller.h"
 
 namespace SmartHub {
+enum Stage {
+  STG_SPI_INIT,
+  STG_CFG_ROM,
+  STG_CFG_STRAP,
+  STG_SMBUS_CHECK,
+  STG_CFG_OTP,
+  STG_CFG_SOC,
+  STG_NORMAL_MODE,
+  STG_UNKNOWN_MODE,
+};
 class HubManager final {
  public:
   HubManager() = default;
@@ -17,6 +27,7 @@ class HubManager final {
   void ResetAllHubs();
   void AddHubController(std::shared_ptr<IHubController> controller);
   void SetNotificationClient(std::shared_ptr<HttpClient> client);
+
   void Start();
 
  private:
