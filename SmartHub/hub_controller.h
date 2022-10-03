@@ -5,18 +5,12 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "port_usb.h"
 
 namespace SmartHub {
-enum Stage {
-  STG_SPI_INIT,
-  STG_CFG_ROM,
-  STG_CFG_STRAP,
-  STG_SMBUS_CHECK,
-  STG_CFG_OTP,
-  STG_CFG_SOC,
-  STG_NORMAL_MODE,
-  STG_UNKNOWN_MODE,
-};
+
 enum class CommandType : uint8_t {
   READ,
   WRITE_FOR_WRITE,
@@ -32,13 +26,21 @@ class IHubController {
   virtual bool RegisterWrite(uint32_t address, uint16_t length,
                              const std::vector<uint8_t> &buffer) = 0;
 
-  virtual bool PortMappingUsb2(std::array<uint8_t, 7> port_map) = 0;
-  virtual bool PortMappingUsb3(std::array<uint8_t, 7> port_map) = 0;
+  virtual bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) = 0;
+  virtual uint8_t GetLogicalMapping(uint8_t phy_port)=0;
+  virtual bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) = 0;
+  virtual UsbConfiguration GetPortConfiguration(uint8_t phy_port)=0;
 
   virtual bool Reset() = 0;
 
   virtual bool CloseEverything() = 0;
   virtual std::string Name() = 0;
 
+  void AddUsbPort(std::shared_ptr<Usbport> port){
+    ports_.push_back(port);
+  }
+
+protected:
+  std::vector<std::shared_ptr<Usbport>> ports_;
 };
 }  // namespace SmartHub
