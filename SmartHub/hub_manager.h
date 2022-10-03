@@ -16,11 +16,11 @@ class HubManager final {
 
   void ResetAllHubs();
   void AddHubController(std::shared_ptr<IHubController> controller);
-  void SetNotifyClient(std::shared_ptr<HttpClient> client);
+  void SetNotificationClient(std::shared_ptr<HttpClient> client);
   void Start();
 
  private:
-  static void Worker(HubManager * manager);
+  void Worker();
   std::vector<std::shared_ptr<IHubController>> hubs_;
   std::shared_ptr<HttpClient> client_;
   std::unique_ptr<std::thread> main_thread_;
