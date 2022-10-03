@@ -1,5 +1,4 @@
-#ifndef SMART_HUB_MANAGER_H
-#define SMART_HUB_MANAGER_H
+#pragma once
 
 #include <stdint.h>
 
@@ -7,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace SmartHub{
+namespace SmartHub {
 enum Stage {
   STG_SPI_INIT,
   STG_CFG_ROM,
@@ -24,9 +23,7 @@ enum class CommandType : uint8_t {
   WRITE_FOR_READ,
 };
 
-
-
-class ISmartHubManager {
+class IHubController {
  public:
   virtual bool Initialize() = 0;
 
@@ -41,9 +38,7 @@ class ISmartHubManager {
   virtual bool Reset() = 0;
 
   virtual bool CloseEverything() = 0;
+  virtual std::string Name() = 0;
 
-  // virtual SmartHubStatus CurrentStatus()=0;
 };
-}
-
-#endif  // end of SMART_HUB_MANAGER_H
+}  // namespace SmartHub

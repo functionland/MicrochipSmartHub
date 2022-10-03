@@ -1,9 +1,8 @@
+#pragma once
 
-#ifndef I2C_SMART_HUB_MANAGER_H
-#define I2C_SMART_HUB_MANAGER_H
+#include "hub_controller.h"
+#include <atomic>
 
-#include "smart_hub_manager.h"
-//#include "utility.h"
 namespace SmartHub {
 
 enum class SpecialSmbusCommands : uint16_t {
@@ -13,10 +12,11 @@ enum class SpecialSmbusCommands : uint16_t {
   OTP_PROGRAM,  // 0X9933  Permanently program configuration commands to the OTP
   OTP_READ,     // 0X9934  Read the values of the OTP register
 };
-class I2CSmartHubManager : public ISmartHubManager {
+
+class I2CHubController : public IHubController {
  public:
-  I2CSmartHubManager(std::string &port_path, int i2c_address);
-  ~I2CSmartHubManager() = default;
+  I2CHubController(std::string &port_path, int i2c_address);
+  ~I2CHubController() = default;
 
   bool Initialize() override;
 
@@ -42,6 +42,7 @@ class I2CSmartHubManager : public ISmartHubManager {
   bool Reset() override;
 
   bool CloseEverything() override;
+  std::string Name()override;
 
   bool SendSpecialCmd(SpecialSmbusCommands cmd);
   uint32_t RetrieveRevision();
@@ -71,11 +72,10 @@ class I2CSmartHubManager : public ISmartHubManager {
   bool ReadSmbus(std::vector<uint8_t> &buff);
 
  private:
-  bool initialized_ = false;
+  std::atomic<bool> initialized_ {false};
   std::string port_path_;
   const int i2c_address_ = 0x2D;
+  /// @brief  handle to i2c file open
   int file_handle_{0};
-  uint8_t register_write_[9];
 };
 }  // namespace SmartHub
-#endif  // I2C_SMART_HUB_MANAGER_H

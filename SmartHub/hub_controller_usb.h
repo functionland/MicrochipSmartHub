@@ -1,16 +1,13 @@
-
-
-#ifndef USB_SMART_HUB_MANAGER_H
-#define USB_SMART_HUB_MANAGER_H
+#pragma once
 
 #include <libusb-1.0/libusb.h>
 
 #include "smart_hub_manager.h"
 namespace SmartHub {
-class UsbSmartHubManager : public ISmartHubManager {
+class UsbHubController : public IHubController {
  public:
-  UsbSmartHubManager();
-  ~UsbSmartHubManager();
+  UsbHubController();
+  ~UsbHubController();
   void SetVidPid(uint16_t vid, uint16_t pid);
 
   bool Initialize() override;
@@ -32,6 +29,8 @@ class UsbSmartHubManager : public ISmartHubManager {
 
   bool CloseEverything() override;
 
+  std::string Name() override;
+
  private:
   // libusb variables
   libusb_device_handle *handle_ = NULL;
@@ -43,4 +42,3 @@ class UsbSmartHubManager : public ISmartHubManager {
   int last_error_code = 0;
 };
 }  // namespace SmartHub
-#endif  // end USB_SMART_HUB_MANAGER_H

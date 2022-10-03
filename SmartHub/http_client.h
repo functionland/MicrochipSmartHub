@@ -1,13 +1,11 @@
-
-
-#ifndef HTTP_CLIENT_H
-#define HTTP_CLIENT_H
+#pragma once
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include <httplib.h>
 #include <memory.h>
 
+namespace SmartHub {
 class HttpClient {
  public:
   HttpClient();
@@ -16,5 +14,4 @@ class HttpClient {
  private:
   std::shared_ptr<httplib::Client> client_;
 };
-
-#endif  // HTTP_CLIENT_H
+}  // namespace SmartHub

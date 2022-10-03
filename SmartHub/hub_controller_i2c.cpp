@@ -1,4 +1,4 @@
-#include "i2c_smart_hub_manager.h"
+#include "hub_controller_i2c.h"
 
 #include "log/logger.h"
 
@@ -14,13 +14,15 @@ extern "C" {
 
 #include "smart_hub_regs_cmd.h"
 
-static constexpr auto TAG{"I2cSmartHubManager"};
+static constexpr auto TAG{"I2CHubController"};
 
 namespace SmartHub {
-I2CSmartHubManager::I2CSmartHubManager(std::string &port_path, int i2c_address)
-    : ISmartHubManager(), port_path_{port_path}, i2c_address_{i2c_address} {}
+I2CHubController::I2CHubController(std::string &port_path, int i2c_address)
+    : IHubController(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
-bool I2CSmartHubManager::Initialize() {
+bool I2CHubController::Initialize() {
+  if (initialized_) return true;
+
   file_handle_ = open(port_path_.c_str(), O_RDWR);
   if (file_handle_ < 0) {
     LOG::Warn(TAG, "Can not open i2c path {} with err:", port_path_,
@@ -35,8 +37,8 @@ bool I2CSmartHubManager::Initialize() {
   initialized_ = true;
   return true;
 }
-bool I2CSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
-                                      std::vector<uint8_t> &data) {
+bool I2CHubController::RegisterRead(uint32_t address, uint16_t length,
+                                    std::vector<uint8_t> &data) {
   if (!initialized_) {
     LOG::Warn(TAG, "Not Initilized (RegisterRead) ");
     return false;
@@ -68,8 +70,8 @@ bool I2CSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
   data = snd_buff;
   return true;
 }
-bool I2CSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
-                                       const std::vector<uint8_t> &data) {
+bool I2CHubController::RegisterWrite(uint32_t address, uint16_t length,
+                                     const std::vector<uint8_t> &data) {
   if (!initialized_) {
     LOG::Warn(TAG, "Not Initilized (RegisterWrite) ");
     return false;
@@ -87,22 +89,26 @@ bool I2CSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
   }
   return true;
 }
-bool I2CSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
+bool I2CHubController::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
   return false;
 }
-bool I2CSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
+bool I2CHubController::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
   return false;
 }
-bool I2CSmartHubManager::Reset() { return false; }
-bool I2CSmartHubManager::CloseEverything() {
+bool I2CHubController::Reset() { return false; }
+bool I2CHubController::CloseEverything() {
   if (close(file_handle_) < 0) {
     LOG::Warn(TAG, "Can not close i2c port");
     return false;
   }
+  initialized_ = false;
   return true;
 }
-bool I2CSmartHubManager::WriteSmbus(std::vector<uint8_t> &buff) {
-  __u8 wbuf[256];
+
+std::string I2CHubController::Name() { return MxStr("I2C hub {}", port_path_); }
+
+bool I2CHubController::WriteSmbus(std::vector<uint8_t> &buff) {
+  uint8_t wbuf[256];
   for (int i = 1; i < buff.size(); i++) wbuf[i] = buff[i];
   wbuf[buff.size()] = '\0';
   const auto res =
@@ -113,8 +119,8 @@ bool I2CSmartHubManager::WriteSmbus(std::vector<uint8_t> &buff) {
   }
   return true;
 }
-bool I2CSmartHubManager::ReadSmbus(std::vector<uint8_t> &buff) {
-  __u8 rbuf[256];
+bool I2CHubController::ReadSmbus(std::vector<uint8_t> &buff) {
+  uint8_t rbuf[256];
   /* Using SMBus commands */
   const auto res = i2c_smbus_read_block_data(file_handle_, 0x5B, rbuf);
   if (res < 0) {
@@ -126,11 +132,11 @@ bool I2CSmartHubManager::ReadSmbus(std::vector<uint8_t> &buff) {
   return true;
 }
 
-void I2CSmartHubManager::PrepareMessage(CommandType type,
-                                        uint8_t total_bytes_loaded,
-                                        uint32_t reg_addr,
-                                        const std::vector<uint8_t> &data,
-                                        std::vector<uint8_t> &buff) {
+void I2CHubController::PrepareMessage(CommandType type,
+                                      uint8_t total_bytes_loaded,
+                                      uint32_t reg_addr,
+                                      const std::vector<uint8_t> &data,
+                                      std::vector<uint8_t> &buff) {
   buff.clear();
 
   switch (type) {
@@ -196,8 +202,8 @@ void I2CSmartHubManager::PrepareMessage(CommandType type,
       return;
   }
 }
-void I2CSmartHubManager::PrepareSpecialMessage(SpecialSmbusCommands type,
-                                               std::vector<uint8_t> &buff) {
+void I2CHubController::PrepareSpecialMessage(SpecialSmbusCommands type,
+                                             std::vector<uint8_t> &buff) {
   buff.clear();
 
   switch (type) {
@@ -232,7 +238,7 @@ void I2CSmartHubManager::PrepareSpecialMessage(SpecialSmbusCommands type,
   }
 }
 
-bool I2CSmartHubManager::SendSpecialCmd(SpecialSmbusCommands cmd) {
+bool I2CHubController::SendSpecialCmd(SpecialSmbusCommands cmd) {
   /* Run configuration access command */
   std::vector<uint8_t> buff;
   PrepareSpecialMessage(cmd, buff);
@@ -242,7 +248,7 @@ bool I2CSmartHubManager::SendSpecialCmd(SpecialSmbusCommands cmd) {
   return true;
 }
 
-uint32_t I2CSmartHubManager::RetrieveRevision() {
+uint32_t I2CHubController::RetrieveRevision() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_DEV_REV, 4, buff)) {
     return -1;
@@ -251,7 +257,7 @@ uint32_t I2CSmartHubManager::RetrieveRevision() {
                                  (buff[3] << 16) + (buff[4] << 24));
   return revision;
 }
-uint16_t I2CSmartHubManager::RetrieveID() {
+uint16_t I2CHubController::RetrieveID() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_DEV_ID, 2, buff)) {
     return -1;
@@ -259,7 +265,7 @@ uint16_t I2CSmartHubManager::RetrieveID() {
   int16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
   return data;
 }
-uint32_t I2CSmartHubManager::RetrieveConfiguration() {
+uint32_t I2CHubController::RetrieveConfiguration() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_HUB_CFG, 3, buff)) {
     return -1;
@@ -269,13 +275,13 @@ uint32_t I2CSmartHubManager::RetrieveConfiguration() {
 
   return data;
 }
-int I2CSmartHubManager::SetUpstreamPort(uint8_t port) {
+int I2CHubController::SetUpstreamPort(uint8_t port) {
   if (!RegisterWrite(USB7252C_HUB_CFG, 1, {port})) {
     return -1;
   }
   return 1;
 }
-int I2CSmartHubManager::SetUsbVID(uint8_t vid1, uint8_t vid2) {
+int I2CHubController::SetUsbVID(uint8_t vid1, uint8_t vid2) {
   if (!RegisterWrite(USB7252C_VENDOR_ID, 1, {vid1, vid2})) {
     return -1;
   }
@@ -298,7 +304,7 @@ static std::string LinkStateToString(uint8_t state) {
   return "invalid";
 }
 
-uint16_t I2CSmartHubManager::RetrieveUsbVID() {
+uint16_t I2CHubController::RetrieveUsbVID() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_VENDOR_ID, 2, buff)) {
     return -1;
@@ -312,7 +318,7 @@ uint16_t I2CSmartHubManager::RetrieveUsbVID() {
 
   return vid;
 }
-int I2CSmartHubManager::IsPortActive(uint8_t port) {
+int I2CHubController::IsPortActive(uint8_t port) {
   std::vector<uint8_t> buff;
   if (!RegisterRead((port < 4) ? USB7252C_USB2_LINK_STATE0_3
                                : USB7252C_USB2_LINK_STATE4_7,
@@ -334,7 +340,7 @@ int I2CSmartHubManager::IsPortActive(uint8_t port) {
 
   return portstat;
 }
-int I2CSmartHubManager::IsPortEnabled(uint8_t port) {
+int I2CHubController::IsPortEnabled(uint8_t port) {
   /*
    * Bit 7 = 1; PHYSICAL Port 7 is disabled.
    * Bit 6 = 1; PHYSICAL Port 6 is disabled.
@@ -362,8 +368,8 @@ int I2CSmartHubManager::IsPortEnabled(uint8_t port) {
 
   return 0;
 }
-int I2CSmartHubManager::DisablePort(uint8_t port) { return 0; }
-int I2CSmartHubManager::SetFlexFeatureRegisters(uint16_t value) {
+int I2CHubController::DisablePort(uint8_t port) { return 0; }
+int I2CHubController::SetFlexFeatureRegisters(uint16_t value) {
   std::vector<uint8_t> buff;
   buff.push_back(value << 8);
   buff.push_back(value);
@@ -372,7 +378,7 @@ int I2CSmartHubManager::SetFlexFeatureRegisters(uint16_t value) {
   }
   return 1;
 }
-uint16_t I2CSmartHubManager::GetFlexFeatureRegisters() {
+uint16_t I2CHubController::GetFlexFeatureRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_FLEX_FEATURE_REG, 2, buff)) {
     return -1;
@@ -380,7 +386,7 @@ uint16_t I2CSmartHubManager::GetFlexFeatureRegisters() {
   uint16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
   return data;
 }
-int I2CSmartHubManager::SetPrimaryI2CAddressRegisters(uint16_t address) {
+int I2CHubController::SetPrimaryI2CAddressRegisters(uint16_t address) {
   std::vector<uint8_t> buff;
   buff.push_back(address << 8);
   buff.push_back(address);
@@ -389,14 +395,14 @@ int I2CSmartHubManager::SetPrimaryI2CAddressRegisters(uint16_t address) {
   }
   return 1;
 }
-uint8_t I2CSmartHubManager::GetPrimaryI2CAddressRegisters() {
+uint8_t I2CHubController::GetPrimaryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_SMBUS_PRIMAIRY_ADR, 1, buff)) {
     return -1;
   }
   return buff[1];
 }
-int I2CSmartHubManager::SetSecondryI2CAddressRegisters(uint16_t address) {
+int I2CHubController::SetSecondryI2CAddressRegisters(uint16_t address) {
   std::vector<uint8_t> buff;
   buff.push_back(address << 8);
   buff.push_back(address);
@@ -405,7 +411,7 @@ int I2CSmartHubManager::SetSecondryI2CAddressRegisters(uint16_t address) {
   }
   return 1;
 }
-uint8_t I2CSmartHubManager::GetSecondryI2CAddressRegisters() {
+uint8_t I2CHubController::GetSecondryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(USB7252C_SMBUS_SECOND_ADR, 1, buff)) {
     return -1;

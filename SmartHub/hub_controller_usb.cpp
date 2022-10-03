@@ -1,4 +1,4 @@
-#include "usb_smart_hub_manager.h"
+#include "hub_controller_usb.h"
 
 #include <libusb-1.0/libusb.h>
 #include <stdio.h>
@@ -33,13 +33,13 @@
 
 #define CTRL_TIMEOUT (5 * 1000) /* milliseconds */
 
-static constexpr auto TAG{"UsbSmartHubManager"};
+static constexpr auto TAG{"UsbHubController"};
 
 namespace SmartHub{
 
-UsbSmartHubManager::UsbSmartHubManager() : ISmartHubManager() {}
+UsbHubController::UsbHubController() : IHubController() {}
 
-bool UsbSmartHubManager::Initialize() {
+bool UsbHubController::Initialize() {
   int error = libusb_init(&ctx_);
   if (error) {
     LOG::Fatal(TAG, "Initialize failed {}{%s}", error,
@@ -59,7 +59,7 @@ bool UsbSmartHubManager::Initialize() {
   return true;
 }
 
-bool UsbSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
+bool UsbHubController::RegisterRead(uint32_t address, uint16_t length,
                                       std::vector<uint8_t> &buffer) {
   if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterRead Handle is NULL");
@@ -90,7 +90,7 @@ bool UsbSmartHubManager::RegisterRead(uint32_t address, uint16_t length,
   }
   return true;
 }
-bool UsbSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
+bool UsbHubController::RegisterWrite(uint32_t address, uint16_t length,
                                        const std::vector<uint8_t> &buffer) {
   if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterWrite Handle is NULL");
@@ -112,7 +112,9 @@ bool UsbSmartHubManager::RegisterWrite(uint32_t address, uint16_t length,
   return true;
 }
 
-bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
+std::string UsbHubController::Name() { return MxStr("USB hub pid:{} vid:{}", pid_,vid_); }
+
+bool UsbHubController::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
   if (handle_ == NULL) {
     LOG::Warn(TAG, "PortMappingUsb2 Handle is NULL");
     return false;
@@ -190,7 +192,7 @@ bool UsbSmartHubManager::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
   return true;
 }
 
-bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
+bool UsbHubController::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
   if (handle_ == NULL) {
     LOG::Warn(TAG, "PortMappingUsb3 Handle is NULL");
     return false;
@@ -272,7 +274,7 @@ bool UsbSmartHubManager::PortMappingUsb3(std::array<uint8_t, 7> port_map) {
   return true;
 }
 
-bool UsbSmartHubManager::Reset() {
+bool UsbHubController::Reset() {
   if (handle_ == NULL) {
     LOG::Warn(TAG, "RegisterWrite Handle is NULL");
     return false;
@@ -290,14 +292,14 @@ bool UsbSmartHubManager::Reset() {
   return true;
 }
 
-void UsbSmartHubManager::SetVidPid(uint16_t vid, uint16_t pid) {
+void UsbHubController::SetVidPid(uint16_t vid, uint16_t pid) {
   vid_ = vid;
   pid_ = pid;
   CloseEverything();
   Initialize();
 }
 
-bool UsbSmartHubManager::CloseEverything() {
+bool UsbHubController::CloseEverything() {
   if (handle_ != NULL) {
     libusb_close(handle_);
     handle_ = NULL;
@@ -309,5 +311,5 @@ bool UsbSmartHubManager::CloseEverything() {
   return true;
 }
 
-UsbSmartHubManager::~UsbSmartHubManager() { CloseEverything(); }
+UsbHubController::~UsbHubController() { CloseEverything(); }
 }
