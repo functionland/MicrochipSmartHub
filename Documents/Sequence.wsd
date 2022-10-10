@@ -1,0 +1,25 @@
+@startuml
+title HubManager
+
+HubManager -> SmartHub: Reset
+HubManager -> SmartHub: Force Config Mode
+HubManager -> UsbPort: Initilize Port Configurations
+
+loop Configurations Applyed
+    HubManager -> SmartHub: Write Ports Configurations
+    HubManager -> SmartHub: Read Ports Configurations
+    SmartHub   --> HubManager: Response
+    HubManager -> UsbPort: Check Configurations
+    UsbPort --> HubManager: Is Okay?
+    HubManager -> SmartHub: Sleep 100ms
+end
+
+HubManager -> SmartHub: Send Attach Commands
+
+loop Need Reset SmartHub
+    HubManager -> SmartHub: Read Ports Configurations
+    HubManager -> UsbPort: Check Configurations For Reset
+    UsbPort --> HubManager: Is Okay?
+    HubManager -> SmartHub: Sleep 100 ms
+end
+@enduml

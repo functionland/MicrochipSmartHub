@@ -99,7 +99,7 @@ bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
                                             UsbConfiguration config) {
   switch (config) {
     case UsbConfiguration::USB_DOWNSTREAM:
-      if (!RegisterWrite(USB7252C_HUB_CFG, 1, {phy_port})) {
+      if (!RegisterWrite(HUB_CFG, 1, {phy_port})) {
         return false;
       }
       return true;
@@ -273,7 +273,7 @@ bool I2CHubController::SendSpecialCmd(SpecialSmbusCommands cmd) {
 
 uint32_t I2CHubController::RetrieveRevision() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_DEV_REV, 4, buff)) {
+  if (!RegisterRead(DEV_REV, 4, buff)) {
     return -1;
   }
   uint32_t revision = (uint32_t)((buff[1] << 0) + (buff[2] << 8) +
@@ -282,7 +282,7 @@ uint32_t I2CHubController::RetrieveRevision() {
 }
 uint16_t I2CHubController::RetrieveID() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_DEV_ID, 2, buff)) {
+  if (!RegisterRead(DEV_ID, 2, buff)) {
     return -1;
   }
   int16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
@@ -290,7 +290,7 @@ uint16_t I2CHubController::RetrieveID() {
 }
 uint32_t I2CHubController::RetrieveConfiguration() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_HUB_CFG, 3, buff)) {
+  if (!RegisterRead(HUB_CFG, 3, buff)) {
     return -1;
   }
   uint32_t data = (uint32_t)((buff[1] << 0) + (buff[2] << 8) + (buff[3] << 16) +
@@ -300,7 +300,7 @@ uint32_t I2CHubController::RetrieveConfiguration() {
 }
 
 int I2CHubController::SetUsbVID(uint8_t vid1, uint8_t vid2) {
-  if (!RegisterWrite(USB7252C_VENDOR_ID, 1, {vid1, vid2})) {
+  if (!RegisterWrite(VENDOR_ID, 1, {vid1, vid2})) {
     return -1;
   }
   return 1;
@@ -324,7 +324,7 @@ static std::string LinkStateToString(uint8_t state) {
 
 uint16_t I2CHubController::RetrieveUsbVID() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_VENDOR_ID, 2, buff)) {
+  if (!RegisterRead(VENDOR_ID, 2, buff)) {
     return -1;
   }
   uint16_t vid = (uint16_t)(buff[2] << 8) + buff[1];
@@ -338,8 +338,8 @@ uint16_t I2CHubController::RetrieveUsbVID() {
 }
 int I2CHubController::IsPortActive(uint8_t port) {
   std::vector<uint8_t> buff;
-  if (!RegisterRead((port < 4) ? USB7252C_USB2_LINK_STATE0_3
-                               : USB7252C_USB2_LINK_STATE4_7,
+  if (!RegisterRead((port < 4) ? USB2_LINK_STATE0_3
+                               : USB2_LINK_STATE4_7,
                     2, buff)) {
     return -1;
   }
@@ -371,13 +371,13 @@ int I2CHubController::IsPortEnabled(uint8_t port) {
    */
 
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_PORT_DIS_SELF, 2, buff)) {
+  if (!RegisterRead(PORT_DIS_SELF, 2, buff)) {
     return -1;
   }
   LOG::Debug(TAG, "Port Disable Self-Powered: 0x%x, return value: %d", buff[1],
              0);
 
-  if (!RegisterRead(USB7252C_PORT_DIS_BUS, 2, buff)) {
+  if (!RegisterRead(PORT_DIS_BUS, 2, buff)) {
     return -1;
   }
 
@@ -391,14 +391,14 @@ int I2CHubController::SetFlexFeatureRegisters(uint16_t value) {
   std::vector<uint8_t> buff;
   buff.push_back(value << 8);
   buff.push_back(value);
-  if (!RegisterWrite(USB7252C_FLEX_FEATURE_REG, 1, buff)) {
+  if (!RegisterWrite(FLEX_FEATURE_REG, 1, buff)) {
     return -1;
   }
   return 1;
 }
 uint16_t I2CHubController::GetFlexFeatureRegisters() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_FLEX_FEATURE_REG, 2, buff)) {
+  if (!RegisterRead(FLEX_FEATURE_REG, 2, buff)) {
     return -1;
   }
   uint16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
@@ -408,14 +408,14 @@ int I2CHubController::SetPrimaryI2CAddressRegisters(uint16_t address) {
   std::vector<uint8_t> buff;
   buff.push_back(address << 8);
   buff.push_back(address);
-  if (!RegisterWrite(USB7252C_SMBUS_PRIMAIRY_ADR, 1, buff)) {
+  if (!RegisterWrite(SMBUS_PRIMAIRY_ADR, 1, buff)) {
     return -1;
   }
   return 1;
 }
 uint8_t I2CHubController::GetPrimaryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_SMBUS_PRIMAIRY_ADR, 1, buff)) {
+  if (!RegisterRead(SMBUS_PRIMAIRY_ADR, 1, buff)) {
     return -1;
   }
   return buff[1];
@@ -424,14 +424,14 @@ int I2CHubController::SetSecondryI2CAddressRegisters(uint16_t address) {
   std::vector<uint8_t> buff;
   buff.push_back(address << 8);
   buff.push_back(address);
-  if (!RegisterWrite(USB7252C_SMBUS_SECOND_ADR, 1, buff)) {
+  if (!RegisterWrite(SMBUS_SECOND_ADR, 1, buff)) {
     return -1;
   }
   return 1;
 }
 uint8_t I2CHubController::GetSecondryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
-  if (!RegisterRead(USB7252C_SMBUS_SECOND_ADR, 1, buff)) {
+  if (!RegisterRead(SMBUS_SECOND_ADR, 1, buff)) {
     return -1;
   }
   return buff[1];
