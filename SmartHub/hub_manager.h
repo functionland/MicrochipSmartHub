@@ -15,6 +15,10 @@ enum Stage {
   STG_CFG_STRAP,
   STG_SMBUS_CHECK,
   STG_CFG_OTP,
+  /// To hold the hub in the SOC_CFG stage, the CONFIG_STRAP pins must be set
+  /// with the correct configuration mode Once in the configuration stage, any
+  /// of the registers may be reconfigured. The hub waits in SOC_CFG
+  /// indefinitely until it receives the special Attach command.
   STG_CFG_SOC,
   STG_NORMAL_MODE,
   STG_UNKNOWN_MODE,
