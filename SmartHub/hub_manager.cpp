@@ -21,24 +21,22 @@ void HubManager::AddHubController(std::shared_ptr<IHubController> controller) {
 void HubManager::Worker() {
   LOG::Debug(TAG, "HUB Manager Is Starting ...");
 
-  ResetAllHubs(); 
+  ResetAllHubs();
   while (runnig_) {
-    
-    
-    /// SetConfiguration for each hub
+    /// Force Configuration Mode
 
     /// Check port status for start configuration
 
     /// if need to restart
 
-    /// 
+    ///
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
   runnig_ = false;
 }
 void HubManager::Start() {
-  main_thread_ = std::make_unique<std::thread>(&HubManager::Worker,this);
+  main_thread_ = std::make_unique<std::thread>(&HubManager::Worker, this);
   runnig_ = true;
   main_thread_->join();
 }
@@ -51,5 +49,13 @@ void HubManager::ResetAllHubs() {
   for (auto &hub : hubs_) {
     if (hub) hub->Reset();
   }
+}
+
+void HubManager::InitilizePorts() {
+  for (int i = 0; i < 4; i++) {
+    auto usb = std::make_shared<Usbport>(USB_TYPE_3, i);
+  }
+  auto usb = std::make_shared<Usbport>(USB_TYPE_2, 5);
+  
 }
 }  // namespace SmartHub
