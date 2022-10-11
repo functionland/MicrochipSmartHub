@@ -4,8 +4,10 @@
 
 namespace SmartHub {
 enum UsbType {
-  USB_TYPE_2,
-  USB_TYPE_3,
+  USB_TYPE_2_UP,
+  USB_TYPE_2_DN,
+  USB_TYPE_3_UP,
+  USB_TYPE_3_DN,
 };
 enum UsbBatteryChargingMode{
     BAT_CHARGING_DISABLED = 0,

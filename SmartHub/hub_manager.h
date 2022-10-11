@@ -35,6 +35,7 @@ class HubManager final {
   void Start();
 
  private:
+  void InitilizePorts();
   void Worker();
   std::vector<std::shared_ptr<IHubController>> hubs_;
   std::shared_ptr<HttpClient> client_;

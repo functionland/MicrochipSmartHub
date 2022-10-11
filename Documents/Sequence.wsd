@@ -9,11 +9,12 @@ loop Configurations Applyed
     HubManager -> SmartHub: Write Ports Configurations
     HubManager -> SmartHub: Read Ports Configurations
     SmartHub   --> HubManager: Response
+    HubManager -> SmartHub: Enable Hub Feature Controller (HFC)
+    note left: If Usb FlexConnect is enabled \n (NO NEED FOR I2C)
     HubManager -> UsbPort: Check Configurations
     UsbPort --> HubManager: Is Okay?
     HubManager -> SmartHub: Sleep 100ms
 end
-
 HubManager -> SmartHub: Send Attach Commands
 
 loop Need Reset SmartHub
