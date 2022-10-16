@@ -20,6 +20,7 @@ find_package(GTest CONFIG REQUIRED)
 set (SRC_PATH
                 main.cpp 
                 port_usb.cpp
+                hub_controller.cpp
                 hub_controller_i2c.cpp
                 hub_manager.cpp
                 http_client.cpp

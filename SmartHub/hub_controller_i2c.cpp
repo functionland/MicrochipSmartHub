@@ -17,7 +17,7 @@ extern "C" {
 static constexpr auto TAG{"I2CHubController"};
 
 namespace SmartHub {
-I2CHubController::I2CHubController(std::string &port_path, int i2c_address)
+I2CHubController::I2CHubController(const std::string &port_path, int i2c_address)
     : IHubController(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
 bool I2CHubController::Initialize() {
@@ -93,32 +93,31 @@ bool I2CHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
                                          uint8_t logic_to) {
   return false;
 }
-uint8_t GetLogicalMapping(uint8_t phy_port) { return 0; }
+uint8_t I2CHubController::GetLogicalMapping(uint8_t phy_port) { return 0; }
 
-bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
-                                            UsbConfiguration config) {
-  switch (config) {
-    case UsbConfiguration::USB_DOWNSTREAM:
-      if (!RegisterWrite(HUB_CFG, 1, {phy_port})) {
-        return false;
-      }
-      return true;
-    case UsbConfiguration::USB_UPSTREAM:
-      break;
-    case UsbConfiguration::USB_POWER_DELIVERY:
-      break;
-    case UsbConfiguration::USB_POWER_SAVING:
-      break;
-    default:
-      break;
-  }
-  return false;
-}
-UsbConfiguration GetPortConfiguration(uint8_t phy_port) {
-  return UsbConfiguration::USB_DOWNSTREAM;
-}
+// bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
+//                                             UsbConfiguration config) {
+//   switch (config) {
+//     case UsbConfiguration::USB_DOWNSTREAM:
+//       if (!RegisterWrite(HUB_CFG, 1, {phy_port})) {
+//         return false;
+//       }
+//       return true;
+//     case UsbConfiguration::USB_UPSTREAM:
+//       break;
+//     case UsbConfiguration::USB_POWER_DELIVERY:
+//       break;
+//     case UsbConfiguration::USB_POWER_SAVING:
+//       break;
+//     default:
+//       break;
+//   }
+//   return false;
+// }
+// UsbConfiguration GetPortConfiguration(uint8_t phy_port) {
+//   return UsbConfiguration::USB_DOWNSTREAM;
+// }
 
-bool I2CHubController::Reset() { return false; }
 bool I2CHubController::CloseEverything() {
   if (close(file_handle_) < 0) {
     LOG::Warn(TAG, "Can not close i2c port");
@@ -128,7 +127,7 @@ bool I2CHubController::CloseEverything() {
   return true;
 }
 
-std::string I2CHubController::Name() { return MxStr("I2C hub {}", port_path_); }
+std::string I2CHubController::Name() { return MxStr("I2C {}", port_path_); }
 
 bool I2CHubController::WriteSmbus(std::vector<uint8_t> &buff) {
   uint8_t wbuf[256];

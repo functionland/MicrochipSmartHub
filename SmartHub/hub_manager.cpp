@@ -12,7 +12,7 @@ HubManager::~HubManager() {
 void HubManager::AddHubController(std::shared_ptr<IHubController> controller) {
   if (controller) {
     hubs_.push_back(controller);
-    LOG::Debug(TAG, "Hub Controller", controller->Name());
+    LOG::Debug(TAG, "Add Hub Controller {}", controller->Name());
   } else {
     LOG::Warn(TAG, "Null Hub Controller");
   }
@@ -53,9 +53,10 @@ void HubManager::ResetAllHubs() {
 
 void HubManager::InitilizePorts() {
   for (int i = 0; i < 4; i++) {
-    auto usb = std::make_shared<Usbport>(USB_TYPE_3, i);
+    auto usb = std::make_shared<Usbport>(USB_TYPE_3_DN, i);
   }
-  auto usb = std::make_shared<Usbport>(USB_TYPE_2, 5);
+  auto usb = std::make_shared<Usbport>(USB_TYPE_2_DN, 5);
   
 }
+
 }  // namespace SmartHub
