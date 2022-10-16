@@ -119,10 +119,10 @@ bool UsbHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
                                          uint8_t logic_to) {
   return false;
 }
-bool UsbHubController::SetPortConfiguration(uint8_t phy_port,
-                                            UsbConfiguration config) {
-  return false;
-}
+// bool UsbHubController::SetPortConfiguration(uint8_t phy_port,
+//                                             UsbConfiguration config) {
+//   return false;
+// }
 // bool UsbHubController::PortMappingUsb2(std::array<uint8_t, 7> port_map) {
 //   if (handle_ == NULL) {
 //     LOG::Warn(TAG, "PortMappingUsb2 Handle is NULL");

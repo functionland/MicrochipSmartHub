@@ -15,7 +15,7 @@ enum class SpecialSmbusCommands : uint16_t {
 
 class I2CHubController : public IHubController {
  public:
-  I2CHubController(std::string &port_path, int i2c_address);
+  I2CHubController(const std::string &port_path, int i2c_address);
   ~I2CHubController() = default;
 
   bool Initialize() override;
@@ -37,11 +37,11 @@ class I2CHubController : public IHubController {
                      const std::vector<uint8_t> &data) override;
 
   bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) override;
-  uint8_t GetLogicalMapping(uint8_t phy_port);
-  bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) ;
-  UsbConfiguration GetPortConfiguration(uint8_t phy_port);
+    virtual uint8_t GetLogicalMapping(uint8_t phy_port)override;
 
-  bool Reset() override;
+  // bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) ;
+  // UsbConfiguration GetPortConfiguration(uint8_t phy_port);
+
 
   bool CloseEverything() override;
   std::string Name()override;

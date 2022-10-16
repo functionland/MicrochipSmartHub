@@ -18,7 +18,7 @@ class UsbHubController : public IHubController {
                      const std::vector<uint8_t> &buffer) override;
 
   bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) override;
-  bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) override;
+  // bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) override;
 
   /// @brief  Reset SmartHub from usb PC0
   /// • Only one device can be accessed at a time

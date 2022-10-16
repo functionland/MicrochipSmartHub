@@ -10,7 +10,7 @@ with SMBus(1) as bus:
     # Example 4-2
 
     reset_pin=10
-    # here we shoud restart hub
+    # here we should restart hub
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(reset_pin, GPIO.OUT)
 

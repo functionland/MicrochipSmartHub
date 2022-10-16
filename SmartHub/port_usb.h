@@ -36,7 +36,7 @@ class Usbport {
   void set_battery_charging_mode(UsbBatteryChargingMode charging){battery_charging_mode_= charging;}
 
   bool is_downstream() const { return is_downstream_; }
-  bool set_is_downstream(bool is_downstream){is_downstream_=is_downstream;}
+  void set_is_downstream(bool is_downstream){is_downstream_=is_downstream;}
 
   bool power_saving_mode() const { return power_saving_mode_; }
   void set_power_saving_mode(bool enabled){power_saving_mode_=enabled_;}

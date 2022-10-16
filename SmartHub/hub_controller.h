@@ -28,10 +28,10 @@ class IHubController {
 
   virtual bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) = 0;
   virtual uint8_t GetLogicalMapping(uint8_t phy_port)=0;
-  virtual bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) = 0;
-  virtual UsbConfiguration GetPortConfiguration(uint8_t phy_port)=0;
+  // virtual bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) = 0;
+  // virtual UsbConfiguration GetPortConfiguration(uint8_t phy_port)=0;
 
-  virtual bool Reset() = 0;
+  virtual bool Reset();
 
   virtual bool CloseEverything() = 0;
   virtual std::string Name() = 0;
