@@ -3,15 +3,12 @@ from time import sleep
 import smbus2
 import time
 
-import resethub
-
-resethub.reset_hub()
+import smarthub
 
 bus = smbus2.SMBus(1)
 time.sleep(1) #wait here to avoid 121 IO Error
 
-#  USB Attach with SMBusRuntime Access Table 275
-bus.write_i2c_block_data(0x2d,0xAA ,[0x56 ,0x00])
+smarthub.usb_attach_with_smb_runtime_access(bus)
 
     
     
