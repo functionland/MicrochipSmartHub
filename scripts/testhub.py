@@ -1,27 +1,11 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 from time import sleep
 import smbus2
-import RPi.GPIO as GPIO
 import time
 
+import resethub
 
-reset_pin=23
-active_usb_pin=17
-
-GPIO.setmode(GPIO.BCM)
-
-GPIO.setwarnings(False)
- 
-GPIO.setup(reset_pin, GPIO.OUT)
-GPIO.setup(active_usb_pin, GPIO.OUT)
-
-print("reset hub")
-GPIO.output(reset_pin, GPIO.LOW)
-GPIO.output(active_usb_pin, GPIO.LOW)
-time.sleep(1)
-GPIO.output(reset_pin, GPIO.HIGH)
-GPIO.output(active_usb_pin, GPIO.HIGH)
-time.sleep(1)
+resethub.reset_hub()
 
 bus = smbus2.SMBus(1)
 time.sleep(1) #wait here to avoid 121 IO Error
@@ -32,5 +16,3 @@ while True:
     data=bus.read_i2c_block_data(0x2d,0x00,15);
     print("".join("%02x " % b for b in data))
     time.sleep(1)
-    
-    
