@@ -134,7 +134,7 @@ bool I2CHubController::WriteSmbus(std::vector<uint8_t> &buff) {
   for (int i = 1; i < buff.size(); i++) wbuf[i] = buff[i];
   wbuf[buff.size()] = '\0';
   const auto res =
-      i2c_smbus_write_block_data(file_handle_, 0x5A, buff.size(), wbuf);
+      i2c_smbus_write_block_data(file_handle_, wbuf[0], buff.size(), wbuf+1);
   if (res < 0) {
     LOG::Warn(TAG, "Can not write to reg with error {} ", strerror(errno));
     return false;
@@ -144,7 +144,7 @@ bool I2CHubController::WriteSmbus(std::vector<uint8_t> &buff) {
 bool I2CHubController::ReadSmbus(std::vector<uint8_t> &buff) {
   uint8_t rbuf[256];
   /* Using SMBus commands */
-  const auto res = i2c_smbus_read_block_data(file_handle_, 0x5B, rbuf);
+  const auto res = i2c_smbus_read_block_data(file_handle_, 0x00, rbuf);
   if (res < 0) {
     LOG::Warn(TAG, "Can not read from reg with error {} ", strerror(errno));
     return false;
