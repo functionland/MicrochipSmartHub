@@ -7,17 +7,53 @@ SmartHub Is a usb hub that integrates system-level functions typically associate
 
 ## Building
 
+### Building vcpkg
+
+```bash
+cd ~/
+git clone https://github.com/microsoft/vcpkg
+cd vcpkg && ./ bootstrap-vcpkg.sh
+```
+
+### Building for rpi zero 2
+
+```bash
+# install yocto bsp toolchians
+
+# enable cross compiling 
+source /opt/poky/4.0.4/environment-setup-cortexa53-poky-linux
+
+# build vcpkg libraries
+cd <vcpkg path>
+./vcpkg install fmt:rpi-linux
+./vcpkg install spdlog:rpi-linux
+./vcpkg install cpp-httplib:rpi-linux
+./vcpkg install gtest:rpi-linux
+
+# build project
+VCPKG_PATH=~/vcpkg/scripts/buildsystems/vcpkg.cmake
+APP_PATH=~/MicrochipSmartHub
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$VCPKG_PATH -DVCPKG_TARGET_TRIPLET=rpi-linux $APP_PATH
+ninja
+
+# move SmartHub/MicrochipSmartHub executable to board and run it
+
+```
+
+
+### Building for x86
+
 ```bash
 
 # getting required packages on board side
 sudo apt install libusb-1.0-0-dev i2c-tools libssl-dev libi2c-dev ninja-build
 
 # install required packages for build project
-cd ~/
-git clone https://github.com/microsoft/vcpkg
-cd vcpkg && ./ bootstrap-vcpkg.sh
+cd <vcpkg path>
+./vcpkg install fmt
+./vcpkg install spdlog
 ./vcpkg install cpp-httplib
-
+./vcpkg install gtest
 
 # build project
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
