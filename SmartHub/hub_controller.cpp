@@ -16,14 +16,15 @@
 
 static constexpr auto TAG{"HubController"};
 
-static const int RESET_N=23;
+static const int RESET_N = 23;
+static const int ACTIVE_HUB = 23;
 
 namespace SmartHub {
 bool IHubController::Reset() {
   /// export gpio RESET_N pin
   FILE *fd = fopen("/sys/class/gpio/export", "w");
   if (fd == NULL) {
-    LOG::Warn(TAG, "Unable to open /sys/class/gpio/export {}",strerror(errno));
+    LOG::Warn(TAG, "Unable to open /sys/class/gpio/export {}", strerror(errno));
     return false;
   }
 
@@ -47,10 +48,19 @@ bool IHubController::Reset() {
       LOG::Warn(TAG, "Unable to open {}", fName);
       return false;
     }
-  fprintf(fd, "1\n");
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   fprintf(fd, "0\n");
   fclose(fd);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  sprintf(fName, "/sys/class/gpio/gpio%d/value", RESET_N);
+  if ((fd = fopen(fName, "w")) == NULL)
+    if (fd == NULL) {
+      LOG::Warn(TAG, "Unable to open {}", fName);
+      return false;
+    }
+
+  fprintf(fd, "1\n");
+  fclose(fd);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
   return true;
 }
