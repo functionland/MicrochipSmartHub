@@ -24,19 +24,28 @@ void HubManager::Worker() {
   ResetAllHubs();
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   while (runnig_) {
-    // configure hub ports
-    // for (auto &hub : hubs_) {
-    //   if (hub)
-    //     hub->SendSpecialCmd(
-    //         USB_ATTACH);
-    // }
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    // run hub
+    // run hub with i2c access
     for (auto &hub : hubs_) {
       if (hub) hub->SendSpecialCmd(USB_ATTACH_WITH_SMB_RUNTIME_ACCESS);
+    }    
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    int count=0;
+    while(count++<10)
+    {
+      for (auto &hub : hubs_) {
+      if (hub) {
+        hub->Revision();
+        hub->RetrieveUsbVID();
+      }
+
+
+    } 
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000000));
+
+
   }
+
   runnig_ = false;
 }
 void HubManager::Start() {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "hub_controller.h"
 #include <atomic>
 
-namespace SmartHub {
+#include "hub_controller.h"
 
+namespace SmartHub {
 
 class I2CHubController : public IHubController {
  public:
@@ -29,29 +29,29 @@ class I2CHubController : public IHubController {
   bool RegisterWrite(uint32_t address, uint16_t length,
                      const std::vector<uint8_t> &data) override;
 
-  bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) override;
-    virtual uint8_t GetLogicalMapping(uint8_t phy_port)override;
+  bool SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
+                         uint8_t logic_to) override;
+  virtual uint8_t GetLogicalMapping(uint8_t phy_port) override;
 
   // bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) ;
   // UsbConfiguration GetPortConfiguration(uint8_t phy_port);
 
-  bool SendSpecialCmd(SpecialCommands cmd)override;
+  bool SendSpecialCmd(SpecialCommands cmd) override;
 
   bool CloseEverything() override;
-  std::string Name()override;
+  std::string Name() override;
 
-  
-  uint32_t RetrieveRevision();
-  uint16_t RetrieveID();
-  uint32_t RetrieveConfiguration();
-  int SetUpstreamPort(uint8_t port);
-  int SetUsbVID(uint8_t usb_vid1, uint8_t usb_vid2);
-  uint16_t RetrieveUsbVID();
-  int IsPortActive(uint8_t port);
-  int IsPortEnabled(uint8_t port);
-  int DisablePort(uint8_t port);
-  int SetFlexFeatureRegisters(uint16_t value);
-  uint16_t GetFlexFeatureRegisters();
+  uint32_t Revision() override;
+  uint16_t RetrieveID() override;
+  uint32_t RetrieveConfiguration() override;
+  int SetUpstreamPort(uint8_t port) override;
+  int SetUsbVID(uint8_t usb_vid1, uint8_t usb_vid2) override;
+  uint16_t RetrieveUsbVID() override;
+  int IsPortActive(uint8_t port) override;
+  int IsPortEnabled(uint8_t port) override;
+  int DisablePort(uint8_t port) override;
+  int SetFlexFeatureRegisters(uint16_t value) override;
+  uint16_t GetFlexFeatureRegisters() override;
   int SetPrimaryI2CAddressRegisters(uint16_t address);
   uint8_t GetPrimaryI2CAddressRegisters();
   int SetSecondryI2CAddressRegisters(uint16_t address);
@@ -62,11 +62,11 @@ class I2CHubController : public IHubController {
                       uint32_t reg_addr, const std::vector<uint8_t> &data,
                       std::vector<uint8_t> &buff);
 
-  bool WriteSmbus(const unsigned char *buff,int size);
-  bool ReadSmbus(std::vector<uint8_t> &buff);
+  bool WriteSmbus(const unsigned char *buff, int size);
+  bool ReadSmbus(std::vector<uint8_t> &buff, int size);
 
  private:
-  std::atomic<bool> initialized_ {false};
+  std::atomic<bool> initialized_{false};
   std::string port_path_;
   const int i2c_address_ = 0x2D;
   /// @brief  handle to i2c file open
