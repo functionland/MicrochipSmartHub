@@ -22,16 +22,20 @@ void HubManager::Worker() {
   LOG::Debug(TAG, "HUB Manager Is Starting ...");
 
   ResetAllHubs();
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   while (runnig_) {
-    /// Force Configuration Mode
-
-    /// Check port status for start configuration
-
-    /// if need to restart
-
-    ///
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // configure hub ports
+    // for (auto &hub : hubs_) {
+    //   if (hub)
+    //     hub->SendSpecialCmd(
+    //         USB_ATTACH);
+    // }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // run hub
+    for (auto &hub : hubs_) {
+      if (hub) hub->SendSpecialCmd(USB_ATTACH_WITH_SMB_RUNTIME_ACCESS);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000000));
   }
   runnig_ = false;
 }
@@ -56,7 +60,6 @@ void HubManager::InitilizePorts() {
     auto usb = std::make_shared<Usbport>(USB_TYPE_3_DN, i);
   }
   auto usb = std::make_shared<Usbport>(USB_TYPE_2_DN, 5);
-  
 }
 
 }  // namespace SmartHub

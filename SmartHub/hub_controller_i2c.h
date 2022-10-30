@@ -5,13 +5,6 @@
 
 namespace SmartHub {
 
-enum class SpecialSmbusCommands : uint16_t {
-  CONFIG_REG_ACCESS,                   // 0X9937  Run memory command
-  USB_ATTACH,                          // 0XAA55  Go to runtime without SMBus
-  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,  // 0XAA56  Go to runtime with SMBus
-  OTP_PROGRAM,  // 0X9933  Permanently program configuration commands to the OTP
-  OTP_READ,     // 0X9934  Read the values of the OTP register
-};
 
 class I2CHubController : public IHubController {
  public:
@@ -42,11 +35,12 @@ class I2CHubController : public IHubController {
   // bool SetPortConfiguration(uint8_t phy_port,UsbConfiguration config) ;
   // UsbConfiguration GetPortConfiguration(uint8_t phy_port);
 
+  bool SendSpecialCmd(SpecialCommands cmd)override;
 
   bool CloseEverything() override;
   std::string Name()override;
 
-  bool SendSpecialCmd(SpecialSmbusCommands cmd);
+  
   uint32_t RetrieveRevision();
   uint16_t RetrieveID();
   uint32_t RetrieveConfiguration();
@@ -68,9 +62,7 @@ class I2CHubController : public IHubController {
                       uint32_t reg_addr, const std::vector<uint8_t> &data,
                       std::vector<uint8_t> &buff);
 
-  void PrepareSpecialMessage(SpecialSmbusCommands type,
-                             std::vector<uint8_t> &buff);
-  bool WriteSmbus(std::vector<uint8_t> &buff);
+  bool WriteSmbus(const unsigned char *buff,int size);
   bool ReadSmbus(std::vector<uint8_t> &buff);
 
  private:
@@ -78,6 +70,6 @@ class I2CHubController : public IHubController {
   std::string port_path_;
   const int i2c_address_ = 0x2D;
   /// @brief  handle to i2c file open
-  int file_handle_{0};
+  int file_handle_{-1};
 };
 }  // namespace SmartHub

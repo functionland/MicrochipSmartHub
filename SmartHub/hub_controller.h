@@ -11,10 +11,17 @@
 
 namespace SmartHub {
 
-enum class CommandType : uint8_t {
+enum CommandType  {
   READ,
   WRITE_FOR_WRITE,
   WRITE_FOR_READ,
+};
+enum SpecialCommands  {
+  CONFIG_REG_ACCESS,                   // 0X9937  Run memory command
+  USB_ATTACH,                          // 0XAA55  Go to runtime without SMBus
+  USB_ATTACH_WITH_SMB_RUNTIME_ACCESS,  // 0XAA56  Go to runtime with SMBus
+  OTP_PROGRAM,  // 0X9933  Permanently program configuration commands to the OTP
+  OTP_READ,     // 0X9934  Read the values of the OTP register
 };
 
 class IHubController {
@@ -25,6 +32,7 @@ class IHubController {
                             std::vector<uint8_t> &buffer) = 0;
   virtual bool RegisterWrite(uint32_t address, uint16_t length,
                              const std::vector<uint8_t> &buffer) = 0;
+  virtual bool SendSpecialCmd(SpecialCommands cmd) = 0;
 
   virtual bool SetLogicalMapping(uint8_t phy_port,uint8_t logic_from, uint8_t logic_to) = 0;
   virtual uint8_t GetLogicalMapping(uint8_t phy_port)=0;
