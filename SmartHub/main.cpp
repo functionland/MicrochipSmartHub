@@ -29,6 +29,7 @@ int main() {
   HubManager manager;
   const std::string i2c_hub1_path="/dev/i2c-1";
   auto i2c_hub1=std::make_shared<I2CHubController>(i2c_hub1_path,0x2D);
+  i2c_hub1->Initialize();
   manager.AddHubController(i2c_hub1);
   manager.Start();    
 

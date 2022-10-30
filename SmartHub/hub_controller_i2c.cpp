@@ -17,7 +17,8 @@ extern "C" {
 static constexpr auto TAG{"I2CHubController"};
 
 namespace SmartHub {
-I2CHubController::I2CHubController(const std::string &port_path, int i2c_address)
+I2CHubController::I2CHubController(const std::string &port_path,
+                                   int i2c_address)
     : IHubController(), port_path_{port_path}, i2c_address_{i2c_address} {}
 
 bool I2CHubController::Initialize() {
@@ -45,22 +46,22 @@ bool I2CHubController::RegisterRead(uint32_t address, uint16_t length,
   }
   std::vector<uint8_t> snd_buff;
   PrepareMessage(CommandType::WRITE_FOR_READ, 0, address, {}, snd_buff);
-  if (!WriteSmbus(snd_buff)) {
+  if (!WriteSmbus(snd_buff.data(), snd_buff.size())) {
     return false;
   }
   /* Run configuration access command */
-  if (!SendSpecialCmd(SpecialSmbusCommands::CONFIG_REG_ACCESS)) {
+  if (!SendSpecialCmd(SpecialCommands::CONFIG_REG_ACCESS)) {
     return false;
   }
   std::vector<uint8_t> read = {
       0x00,  // Buffer address MSB: always 0
       0x06,  // Buffer address LSB: 6 to skip header
   };
-  if (!WriteSmbus(snd_buff)) {
+  if (!WriteSmbus(snd_buff.data(), snd_buff.size())) {
     return false;
   }
   snd_buff.clear();
-  if (!ReadSmbus(snd_buff)) {
+  if (!ReadSmbus(snd_buff, length)) {
     return false;
   }
   if (snd_buff.size() != length) {
@@ -79,12 +80,11 @@ bool I2CHubController::RegisterWrite(uint32_t address, uint16_t length,
   std::vector<uint8_t> buff;
   PrepareMessage(CommandType::WRITE_FOR_WRITE, buff.size(), address, data,
                  buff);
-  if (!WriteSmbus(buff)) {
+  if (!WriteSmbus(buff.data(), buff.size())) {
     return false;
   }
   /* Run configuration access command */
-  PrepareSpecialMessage(SpecialSmbusCommands::CONFIG_REG_ACCESS, buff);
-  if (!WriteSmbus(buff)) {
+  if (!SendSpecialCmd(SpecialCommands::CONFIG_REG_ACCESS)) {
     return false;
   }
   return true;
@@ -93,6 +93,8 @@ bool I2CHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
                                          uint8_t logic_to) {
   return false;
 }
+
+int I2CHubController::SetUpstreamPort(uint8_t port) { return -1; }
 uint8_t I2CHubController::GetLogicalMapping(uint8_t phy_port) { return 0; }
 
 // bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
@@ -129,28 +131,25 @@ bool I2CHubController::CloseEverything() {
 
 std::string I2CHubController::Name() { return MxStr("I2C {}", port_path_); }
 
-bool I2CHubController::WriteSmbus(std::vector<uint8_t> &buff) {
-  uint8_t wbuf[256];
-  for (int i = 1; i < buff.size(); i++) wbuf[i] = buff[i];
-  wbuf[buff.size()] = '\0';
-  const auto res =
-      i2c_smbus_write_block_data(file_handle_, wbuf[0], buff.size(), wbuf+1);
-  if (res < 0) {
+bool I2CHubController::WriteSmbus(const unsigned char *buff, int size) {
+  if (write(file_handle_, buff, size) < 0) {
     LOG::Warn(TAG, "Can not write to reg with error {} ", strerror(errno));
     return false;
   }
   return true;
 }
-bool I2CHubController::ReadSmbus(std::vector<uint8_t> &buff) {
-  uint8_t rbuf[256];
-  /* Using SMBus commands */
-  const auto res = i2c_smbus_read_block_data(file_handle_, 0x00, rbuf);
-  if (res < 0) {
+bool I2CHubController::ReadSmbus(std::vector<uint8_t> &buff, int size) {
+  static constexpr auto kSize = 256;
+  unsigned char rbuf[kSize];
+  if (size > kSize) {
+    LOG::Warn(TAG, "size {} is greater than 256", kSize);
+    size = kSize;
+  }
+  if (read(file_handle_, rbuf, size) < 0) {
     LOG::Warn(TAG, "Can not read from reg with error {} ", strerror(errno));
     return false;
   }
-
-  for (int i = 0; i < res; i++) buff.push_back(rbuf[i]);
+  for (int i = 0; i < size; i++) buff.push_back(rbuf[i]);
   return true;
 }
 
@@ -191,8 +190,8 @@ void I2CHubController::PrepareMessage(CommandType type,
       buff.push_back(0x01);  // byte 4 transaction type 0x00 for write
       // byte 5 Input the total number of consecutive bytes to write
       // (i.e: total number of consecutive registers to modify)
-      buff.push_back(
-          total_bytes_loaded);  // byte 5 Number of byte read for address
+      // byte 5 Number of byte read for address
+      buff.push_back(total_bytes_loaded);
 
       // byte 6-9
       buff.push_back((uint8_t)(reg_addr >> 24));
@@ -224,53 +223,48 @@ void I2CHubController::PrepareMessage(CommandType type,
       return;
   }
 }
-void I2CHubController::PrepareSpecialMessage(SpecialSmbusCommands type,
-                                             std::vector<uint8_t> &buff) {
-  buff.clear();
 
-  switch (type) {
-    case SpecialSmbusCommands::CONFIG_REG_ACCESS:
-      buff.push_back(0x99);
-      buff.push_back(0x37);
-      buff.push_back(0x00);
+bool I2CHubController::SendSpecialCmd(SpecialCommands cmd) {
+  /* Run configuration access command */
+  static constexpr int kSize = 3;
+  unsigned char buff[kSize];
+  switch (cmd) {
+    case SpecialCommands::CONFIG_REG_ACCESS:
+      buff[0] = 0x99;
+      buff[1] = 0x37;
+      buff[2] = 0x00;
       break;
-    case SpecialSmbusCommands::OTP_PROGRAM:
-      buff.push_back(0x99);
-      buff.push_back(0x33);
-      buff.push_back(0x00);
+    case SpecialCommands::OTP_PROGRAM:
+      buff[0] = 0x99;
+      buff[1] = 0x33;
+      buff[2] = 0x00;
       break;
-    case SpecialSmbusCommands::OTP_READ:
-      buff.push_back(0x99);
-      buff.push_back(0x34);
-      buff.push_back(0x00);
+    case SpecialCommands::OTP_READ:
+      buff[0] = 0x99;
+      buff[1] = 0x34;
+      buff[2] = 0x00;
       break;
-    case SpecialSmbusCommands::USB_ATTACH:
-      buff.push_back(0xAA);
-      buff.push_back(0x55);
-      buff.push_back(0x00);
+    case SpecialCommands::USB_ATTACH:
+      buff[0] = 0xAA;
+      buff[1] = 0x55;
+      buff[2] = 0x00;
       break;
-    case SpecialSmbusCommands::USB_ATTACH_WITH_SMB_RUNTIME_ACCESS:
-      buff.push_back(0xAA);
-      buff.push_back(0x56);
-      buff.push_back(0x00);
+    case SpecialCommands::USB_ATTACH_WITH_SMB_RUNTIME_ACCESS:
+      buff[0] = 0xAA;
+      buff[1] = 0x56;
+      buff[2] = 0x00;
       break;
 
     default:
       break;
   }
-}
-
-bool I2CHubController::SendSpecialCmd(SpecialSmbusCommands cmd) {
-  /* Run configuration access command */
-  std::vector<uint8_t> buff;
-  PrepareSpecialMessage(cmd, buff);
-  if (!WriteSmbus(buff)) {
+  if (!WriteSmbus(buff, kSize)) {
     return false;
   }
   return true;
 }
 
-uint32_t I2CHubController::RetrieveRevision() {
+uint32_t I2CHubController::Revision() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(DEV_REV, 4, buff)) {
     return -1;
@@ -329,7 +323,7 @@ uint16_t I2CHubController::RetrieveUsbVID() {
   uint16_t vid = (uint16_t)(buff[2] << 8) + buff[1];
 
   if (vid != VENDOR_ID_MICROCHIP) {
-    LOG::Error(TAG, "Expect MicroChip Vendor ID (=0x%.4X) , got 0x%.4X",
+    LOG::Error(TAG, "Expect MicroChip Vendor ID {:#X} , got {:#X}",
                VENDOR_ID_MICROCHIP, vid);
   }
 
@@ -337,9 +331,8 @@ uint16_t I2CHubController::RetrieveUsbVID() {
 }
 int I2CHubController::IsPortActive(uint8_t port) {
   std::vector<uint8_t> buff;
-  if (!RegisterRead((port < 4) ? USB2_LINK_STATE0_3
-                               : USB2_LINK_STATE4_7,
-                    2, buff)) {
+  if (!RegisterRead((port < 4) ? USB2_LINK_STATE0_3 : USB2_LINK_STATE4_7, 2,
+                    buff)) {
     return -1;
   }
   int portstat = buff[1];

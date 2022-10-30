@@ -1,24 +1,54 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "SmartHub",
-            "program": "${workspaceFolder}/build/SmartHub/MicrochipSmartHub",
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "TestServer",
-            "program": "${workspaceFolder}/build/TestServer/TestServer",
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "SmartHub",
+      "program": "${workspaceFolder}/build/SmartHub/MicrochipSmartHub",
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "TestServer",
+      "program": "${workspaceFolder}/build/TestServer/TestServer",
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "arm attach",
+      "type": "gdb",
+      "request": "launch",
+      "gdbpath": "gdb",
+      "target": "/home/root/MicrochipSmartHub",
+      "cwd": "${workspaceRoot}",
+      "ssh": {
+        "host": "192.168.12.202",
+        "cwd": "/home/root/",
+        "user": "root",
+        "password": "",
+        "port": 22,
+        "useAgent": false,
+        "forwardX11": false
+      }
+    },
+    {
+        "name": "arm attach2",
+        "type": "gdb",
+        "request": "attach",
+        "gdbpath": "/usr/bin/gdb-multiarch",
+        "executable": "${workspaceRoot}/buildarm/SmartHub/MicrochipSmartHub",
+        "target": "192.168.12.202:9091",
+        "remote": true,
+        "printCalls": false,
+        "cwd": "${workspaceRoot}",
+        "valuesFormatting": "parseText",
+        
+    }
+  ]
 }
