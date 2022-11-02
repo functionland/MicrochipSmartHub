@@ -45,3 +45,20 @@ i2ctransfer -y 1 w6@0x2D 0x00 0x06 0x5B 0x08 0x16 0x49 r4
 
 
 ```
+
+# Board Network Configuration
+
+```bash
+#create shared ip v4 address on usb connection
+nmcli connection add type ethernet ifname usb0 ipv4.method shared con-name local
+
+#change ip address range fo usb 
+nmcli connection modify local ipv4.address 192.168.25.1/24
+
+nmcli con mod local connection.autoconnect yes
+
+nmcli connection down local
+nmcli connection up local
+
+```
+
