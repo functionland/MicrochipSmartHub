@@ -63,7 +63,7 @@ class I2CHubController : public IHubController {
                       std::vector<uint8_t> &buff);
 
   bool WriteSmbus(const unsigned char *buff, int size);
-  bool ReadSmbus(std::vector<uint8_t> &buff, int size);
+  bool ReadSmbus(std::vector<uint8_t> &buff);
 
  private:
   std::atomic<bool> initialized_{false};

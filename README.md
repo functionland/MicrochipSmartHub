@@ -56,7 +56,7 @@ cd <vcpkg path>
 ./vcpkg install gtest
 
 # build project
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_FLAGS_DEBUG="-g -O0" -DCMAKE_CXX_FLAGS_DEBUG="-g -O0" -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../
 ninja
 ./SmartHub/MicrochipSmartHub
 
