@@ -35,8 +35,10 @@ void HubManager::Worker() {
     {
       for (auto &hub : hubs_) {
       if (hub) {
-        hub->Revision();
+        //hub->Revision();
         hub->RetrieveUsbVID();
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
       }
 
 
