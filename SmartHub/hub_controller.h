@@ -6,11 +6,16 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "port_usb.h"
 
 namespace SmartHub {
 
+enum HubControllerType{
+    HUB_CONTL_I2C,
+    HUB_CONTL_USB
+};
 enum CommandType {
   READ,
   WRITE_FOR_WRITE,
@@ -60,5 +65,6 @@ class IHubController {
 
  protected:
   std::vector<std::shared_ptr<Usbport>> ports_;
+  std::mutex lock_;
 };
 }  // namespace SmartHub

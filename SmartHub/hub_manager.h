@@ -29,7 +29,7 @@ class HubManager final {
   ~HubManager();
 
   void ResetAllHubs();
-  void AddHubController(std::shared_ptr<IHubController> controller);
+  void AddNewI2CController(const std::string &path, int address);
   void SetNotificationClient(std::shared_ptr<HttpClient> client);
 
   void Start();
@@ -41,5 +41,6 @@ class HubManager final {
   std::shared_ptr<HttpClient> client_;
   std::unique_ptr<std::thread> main_thread_;
   std::atomic<bool> runnig_{false};
+  std::mutex lock_;
 };
 }  // namespace SmartHub
