@@ -22,6 +22,7 @@ set (SRC_PATH
                 hub_controller_i2c.cpp
                 hub_manager.cpp
                 http_client.cpp
+                http_server.cpp
                 log/logger.cpp
                 )
 

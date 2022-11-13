@@ -1,5 +1,6 @@
 #include "hub_manager.h"
 
+#include "hub_controller_i2c.h"
 #include "log/logger.h"
 
 static constexpr auto TAG{"HubManager"};
@@ -9,12 +10,15 @@ HubManager::~HubManager() {
   runnig_ = false;
   LOG::Warn(TAG, "Hub Controller is Shutting down ...");
 }
-void HubManager::AddHubController(std::shared_ptr<IHubController> controller) {
+void HubManager::AddNewI2CController(const std::string &path, int address) {
+  std::lock_guard<std::mutex> lock{lock_};
+  auto controller = std::make_shared<I2CHubController>(path, address);
   if (controller) {
+    controller->Initialize();
     hubs_.push_back(controller);
     LOG::Debug(TAG, "Add Hub Controller {}", controller->Name());
   } else {
-    LOG::Warn(TAG, "Null Hub Controller");
+    LOG::Warn(TAG, "I2C Hub Controller {} {} is NULL", path, address);
   }
 }
 
@@ -27,25 +31,20 @@ void HubManager::Worker() {
     // run hub with i2c access
     for (auto &hub : hubs_) {
       if (hub) hub->SendSpecialCmd(USB_ATTACH_WITH_SMB_RUNTIME_ACCESS);
-    }    
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    int count=0;
-    while(count++<10)
-    {
+    int count = 0;
+    while (count++ < 10) {
       for (auto &hub : hubs_) {
-      if (hub) {
-        //hub->Revision();
-        hub->RetrieveUsbVID();
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-
+        if (hub) {
+          hub->SetUsbVID(0x12, 0x34);
+          // hub->Revision();
+          hub->RetrieveUsbVID();
+          std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
       }
-
-
-    } 
     }
-
-
   }
 
   runnig_ = false;

@@ -15,14 +15,14 @@ extern "C" {
 #include "smart_hub_regs.h"
 
 static constexpr auto TAG{"I2CHubController"};
-static void debug_buffer(std::vector<uint8_t> &buff)
+inline static void debug_buffer(std::vector<uint8_t> &buff)
 {
    std::string str;
   for(auto a:buff)
   {
-    str+=fmt::format("{:#X} ",a);
+    str+=fmt::format("{:#X},",a);
   }
-  LOG::Debug(TAG, "buf is {} ",str);
+  LOG::Debug(TAG, "{}",str);
 }
 
 namespace SmartHub {
@@ -53,7 +53,7 @@ bool I2CHubController::RegisterRead(uint32_t address, uint16_t length,
     LOG::Warn(TAG, "Not Initilized (RegisterRead) ");
     return false;
   }
-
+  std::lock_guard<std::mutex> lock(lock_);
   std::vector<uint8_t> snd_buff;
   PrepareMessage(CommandType::WRITE_FOR_READ, 2, address, {}, snd_buff);
   if (!WriteSmbus(snd_buff.data(), snd_buff.size())) {
@@ -87,8 +87,10 @@ bool I2CHubController::RegisterWrite(uint32_t address, uint16_t length,
     LOG::Warn(TAG, "Not Initilized (RegisterWrite) ");
     return false;
   }
+  std::lock_guard<std::mutex> lock(lock_);
+
   std::vector<uint8_t> buff;
-  PrepareMessage(CommandType::WRITE_FOR_WRITE, buff.size(), address, data,
+  PrepareMessage(CommandType::WRITE_FOR_WRITE, data.size(), address, data,
                  buff);
   if (!WriteSmbus(buff.data(), buff.size())) {
     return false;
@@ -186,7 +188,7 @@ void I2CHubController::PrepareMessage(CommandType type,
       for (auto &a : data) {
         buff.push_back(a);
       }
-      LOG::Debug(TAG, "Write For Write SMBus ");
+      debug_buffer(buff);
       // for byte 10-136
       // Up to 128 Bytes of Data payload. Must match the value present in Byte 5
       // and the value present in Byte 3 minus six (6).
@@ -301,7 +303,7 @@ uint32_t I2CHubController::RetrieveConfiguration() {
 }
 
 int I2CHubController::SetUsbVID(uint8_t vid1, uint8_t vid2) {
-  if (!RegisterWrite(VENDOR_ID, 1, {vid1, vid2})) {
+  if (!RegisterWrite(VENDOR_ID, 2, {vid1, vid2})) {
     return -1;
   }
   return 1;
