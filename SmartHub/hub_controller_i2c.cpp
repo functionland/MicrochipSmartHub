@@ -106,7 +106,7 @@ bool I2CHubController::SetLogicalMapping(uint8_t phy_port, uint8_t logic_from,
   return false;
 }
 
-int I2CHubController::SetUpstreamPort(uint8_t port) { return -1; }
+int I2CHubController::SetUpstreamPort(uint8_t port) { return HUB_ERR; }
 uint8_t I2CHubController::GetLogicalMapping(uint8_t phy_port) { return 0; }
 
 // bool I2CHubController::SetPortConfiguration(uint8_t phy_port,
@@ -235,6 +235,10 @@ void I2CHubController::PrepareMessage(CommandType type,
 }
 
 bool I2CHubController::SendSpecialCmd(SpecialCommands cmd) {
+  if (!initialized_) {
+    LOG::Warn(TAG, "Not Initilized (SendSpecialCmd)  {}",cmd);
+    return false;
+  }
   /* Run configuration access command */
   static constexpr int kSize = 3;
   unsigned char buff[kSize];
@@ -277,7 +281,7 @@ bool I2CHubController::SendSpecialCmd(SpecialCommands cmd) {
 uint32_t I2CHubController::Revision() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(DEV_REV, 4, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   uint32_t revision = (uint32_t)((buff[1] << 0) + (buff[2] << 8) +
                                  (buff[3] << 16) + (buff[4] << 24));
@@ -286,7 +290,7 @@ uint32_t I2CHubController::Revision() {
 uint16_t I2CHubController::RetrieveID() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(DEV_ID, 2, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   int16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
   return data;
@@ -294,7 +298,7 @@ uint16_t I2CHubController::RetrieveID() {
 uint32_t I2CHubController::RetrieveConfiguration() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(HUB_CFG, 3, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   uint32_t data = (uint32_t)((buff[1] << 0) + (buff[2] << 8) + (buff[3] << 16) +
                              (buff[4] << 24));
@@ -304,7 +308,7 @@ uint32_t I2CHubController::RetrieveConfiguration() {
 
 int I2CHubController::SetUsbVID(uint8_t vid1, uint8_t vid2) {
   if (!RegisterWrite(VENDOR_ID, 2, {vid1, vid2})) {
-    return -1;
+    return HUB_ERR;
   }
   return 1;
 }
@@ -328,7 +332,7 @@ static std::string LinkStateToString(uint8_t state) {
 uint16_t I2CHubController::RetrieveUsbVID() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(VENDOR_ID, 2, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   uint16_t vid = (uint16_t)(buff[2] << 8) + buff[1];
   LOG::Debug(TAG,"vid of hub is: {:#X}",vid);
@@ -339,7 +343,7 @@ int I2CHubController::IsPortActive(uint8_t port) {
   std::vector<uint8_t> buff;
   if (!RegisterRead((port < 4) ? USB2_LINK_STATE0_3 : USB2_LINK_STATE4_7, 2,
                     buff)) {
-    return -1;
+    return HUB_ERR;
   }
   int portstat = buff[1];
 
@@ -370,13 +374,13 @@ int I2CHubController::IsPortEnabled(uint8_t port) {
 
   std::vector<uint8_t> buff;
   if (!RegisterRead(PORT_DIS_SELF, 2, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   LOG::Debug(TAG, "Port Disable Self-Powered: 0x%x, return value: %d", buff[1],
              0);
 
   if (!RegisterRead(PORT_DIS_BUS, 2, buff)) {
-    return -1;
+    return HUB_ERR;
   }
 
   LOG::Debug(TAG, "Port Disable Bus-Powered: 0x%x, return value: %d", buff[1],
@@ -390,14 +394,14 @@ int I2CHubController::SetFlexFeatureRegisters(uint16_t value) {
   buff.push_back(value << 8);
   buff.push_back(value);
   if (!RegisterWrite(FLEX_FEATURE_REG, 1, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   return 1;
 }
 uint16_t I2CHubController::GetFlexFeatureRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(FLEX_FEATURE_REG, 2, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   uint16_t data = (uint16_t)((buff[1]) + (buff[2] << 8));
   return data;
@@ -407,14 +411,14 @@ int I2CHubController::SetPrimaryI2CAddressRegisters(uint16_t address) {
   buff.push_back(address << 8);
   buff.push_back(address);
   if (!RegisterWrite(SMBUS_PRIMAIRY_ADR, 1, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   return 1;
 }
 uint8_t I2CHubController::GetPrimaryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(SMBUS_PRIMAIRY_ADR, 1, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   return buff[1];
 }
@@ -423,14 +427,14 @@ int I2CHubController::SetSecondryI2CAddressRegisters(uint16_t address) {
   buff.push_back(address << 8);
   buff.push_back(address);
   if (!RegisterWrite(SMBUS_SECOND_ADR, 1, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   return 1;
 }
 uint8_t I2CHubController::GetSecondryI2CAddressRegisters() {
   std::vector<uint8_t> buff;
   if (!RegisterRead(SMBUS_SECOND_ADR, 1, buff)) {
-    return -1;
+    return HUB_ERR;
   }
   return buff[1];
 }

@@ -38,10 +38,11 @@ void HubManager::Worker() {
     while (count++ < 10) {
       for (auto &hub : hubs_) {
         if (hub) {
-          hub->SetUsbVID(0x12, 0x34);
-          // hub->Revision();
-          hub->RetrieveUsbVID();
-          std::this_thread::sleep_for(std::chrono::seconds(1));
+          if (hub->SetUsbVID(0x12, 0x34) != HUB_ERR) {
+            // hub->Revision();
+            hub->RetrieveUsbVID();
+          }
+          std::this_thread::sleep_for(std::chrono::seconds(20));
         }
       }
     }
