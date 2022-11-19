@@ -68,9 +68,9 @@ void HubManager::ResetAllHubs() {
 
 void HubManager::InitilizePorts() {
   for (int i = 0; i < 4; i++) {
-    auto usb = std::make_shared<Usbport>(USB_TYPE_3_DN, i);
+    auto usb = std::make_shared<Usbport>(USB_TYPE_3, i);
   }
-  auto usb = std::make_shared<Usbport>(USB_TYPE_2_DN, 5);
+  auto usb = std::make_shared<Usbport>(USB_TYPE_2, 5);
 }
 
 }  // namespace SmartHub
