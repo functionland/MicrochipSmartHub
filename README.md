@@ -29,6 +29,7 @@ cd <vcpkg path>
 ./vcpkg install spdlog:rpi-linux
 ./vcpkg install cpp-httplib:rpi-linux
 ./vcpkg install gtest:rpi-linux
+./vcpkg install nlohmann-json:rpi-linux
 
 # build project
 VCPKG_PATH=~/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -54,6 +55,7 @@ cd <vcpkg path>
 ./vcpkg install spdlog
 ./vcpkg install cpp-httplib
 ./vcpkg install gtest
+./vcpkg install nlohmann-json
 
 # build project
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_FLAGS_DEBUG="-g -O0" -DCMAKE_CXX_FLAGS_DEBUG="-g -O0" -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake  ../

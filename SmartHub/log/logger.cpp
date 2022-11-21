@@ -8,40 +8,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 
-
+namespace fs = std::filesystem;
 
 std::vector<std::shared_ptr<spdlog::logger>> Logger::logger_{};
 void Logger::Init(std::string_view path) {
-  // static constexpr auto kMaxFileByte{1048576 * 10};
-  //  static constexpr auto kMaxFileCount{6u};
-  //  auto file_log =
-  //  spdlog::rotating_logger_mt<spdlog::async_factory_nonblock>(
-  //      "file", path.data(), kMaxFileByte, kMaxFileCount);
-  //  file_log->set_pattern("[%x %H:%M:%S.%e] %v");
-  //#if defined(_DEF_CORE_DEVELOPMENT_) || defined(__x86_64__)
-  //  file_log->set_level(spdlog::level::trace);
-  //#else
-  //  file_log->set_level(spdlog::level::info);
-  //#endif
+  static constexpr auto kMaxFileByte{1024*1024*50};
+  static constexpr auto kMaxFileCount{1u};
+
+  auto file_log = spdlog::rotating_logger_mt<spdlog::async_factory_nonblock>(
+      "file", path.data(), kMaxFileByte, kMaxFileCount);
+  file_log->set_pattern("[%x %H:%M:%S.%e] %v");
+  file_log->set_level(spdlog::level::trace);
 
   auto console_log =
-      spdlog::stdout_color_mt /*<spdlog::async_factory_nonblock>*/ ("console");
+      spdlog::stdout_color_mt <spdlog::async_factory_nonblock> ("console");
   console_log->set_pattern("%^[%-8l] %x %H:%M:%S.%e %$ %v");
-#ifdef _DEF_CORE_DEVELOPMENT_
   console_log->set_level(spdlog::level::trace);
-#else
-  console_log->set_level(spdlog::level::trace);
-#endif
 
   spdlog::flush_every(std::chrono::seconds(5));
   spdlog::flush_on(spdlog::level::critical);
 
-  // logger_.push_back(file_log);
+  logger_.push_back(file_log);
   logger_.push_back(console_log);
 }
 

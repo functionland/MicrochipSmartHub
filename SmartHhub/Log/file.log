@@ -1,0 +1,31 @@
+[11/14/22 16:19:55.843] Main                      SmartHub Started...
+[11/14/22 16:19:55.843] HttpServer                Initialized
+[11/14/22 16:19:55.843] HttpServer                Can not start HttpServer
+[11/14/22 16:19:55.843] I2CHubController          Can not open i2c path /dev/i2c-1 with err:
+[11/14/22 16:19:55.843] HubManager                Add Hub Controller I2C /dev/i2c-1
+[11/14/22 16:19:55.844] HubManager                HUB Manager Is Starting ...
+[11/14/22 16:19:55.844] HubController             Unable to open /sys/class/gpio/export Permission denied
+[11/14/22 16:19:56.844] I2CHubController          Can not write to reg with error Bad file descriptor 
+[11/14/22 16:19:56.944] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:19:56.944] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:19:57.944] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:19:57.944] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:19:58.944] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:19:58.944] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:19:59.944] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:19:59.944] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:12.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:12.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:13.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:13.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:14.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:14.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:15.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:15.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:16.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:16.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:17.359] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:17.359] I2CHubController          Not Initilized (RegisterRead) 
+[11/14/22 16:20:18.360] I2CHubController          Can not write to reg with error Bad file descriptor 
+[11/14/22 16:20:18.460] I2CHubController          Not Initilized (RegisterWrite) 
+[11/14/22 16:20:18.460] I2CHubController          Not Initilized (RegisterRead) 

@@ -1,0 +1,61 @@
+{
+  "ipAddress": "192.168.12.25",
+  "httpPort": 8995,
+  "logEnable": "on",
+  "logLevel": 10,
+
+  "hubs": [
+    {
+      "name": "SmartHub1",
+      "i2cPath": "/dev/i2c-1",
+      "gpioPin": 23,
+      "usbPorts": [
+        {
+          "enable": "true",
+          "type":"usb3",
+          "physicalNumber": "1",
+          "logicalNumber": "1",
+          "batteryChargingMode": "disabled",
+          "streamStatus": "upstream",
+          "flexConnect": "disabled"
+        },
+        {
+          "enable": "true",
+          "type":"usb3",
+          "physicalNumber": "2",
+          "logicalNumber": "2",
+          "batteryChargingMode": "disabled",
+          "streamStatus": "downstream",
+          "flexConnect": "disabled"
+        },
+        {
+          "enable": "true",
+          "type":"usb3",
+          "physicalNumber": "3",
+          "logicalNumber": "3",
+          "batteryChargingMode": "disabled",
+          "streamStatus": "downstream",
+          "flexConnect": "disabled"
+        },
+        {
+          "enable": "true",
+          "type":"usb3",
+          "physicalNumber": "4",
+          "logicalNumber": "4",
+          "batteryChargingMode": "disabled",
+          "streamStatus": "downstream",
+          "flexConnect": "disabled"
+        },
+        {
+          "enable": "true",
+          "type":"usb2",
+          "physicalNumber": "5",
+          "logicalNumber": "5",
+          "batteryChargingMode": "disabled",
+          "streamStatus": "downstream",
+          "flexConnect": "disabled"
+        }
+      ]
+    }
+  ]
+}

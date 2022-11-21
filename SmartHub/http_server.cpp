@@ -2,6 +2,12 @@
 
 #include <httplib.h>
 
+#include <fstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
+#include <streambuf>
+
+#include "global.h"
 #include "log/logger.h"
 
 static constexpr auto TAG{"HttpServer"};
@@ -15,6 +21,29 @@ static std::string log(const Request &req, const Response &res);
 
 namespace SmartHub {
 
+void HttpServer::SetSmartHubConfig(const Request &req, Response &resp) {
+  auto configs = nlohmann::json::parse(req.body);
+  LOG::Warn(TAG, "{}", configs.dump());
+}
+void HttpServer::GetSmartHubStatus(const Request &req, Response &resp) {
+  const char *fmt = "<p>Status: <span style='color:red;'>%d</span></p>";
+  char buf[BUFSIZ];
+  snprintf(buf, sizeof(buf), fmt, resp.status);
+  resp.set_content(buf, "text/html");
+}
+void HttpServer::GetSmartHubLog(const httplib::Request &req,
+                                httplib::Response &resp) {
+  const std::string log_path = APP_LOG_PATH;
+  std::ifstream file(log_path);
+  file.seekg(0, std::ios::end);
+  size_t size = file.tellg();
+  std::string buffer(size, ' ');
+  file.seekg(0);
+  file.read(&buffer[0], size);
+
+  resp.set_content(buffer, "text/plain");
+}
+
 bool HttpServer::Init(int port) {
   port_ = port;
   server_ = std::make_unique<Server>();
@@ -22,9 +51,14 @@ bool HttpServer::Init(int port) {
     LOG::Warn(TAG, "Can Not Create HttpServer");
     return false;
   }
-  server_->Post("/Config", [=](const Request &req, Response &res) {
-    printf("server got json...\n");
-    printf("body is: %s \n", req.body.c_str());
+  server_->Post("/config", [this](const Request &req, Response &res) {
+    this->SetSmartHubConfig(req, res);
+  });
+  server_->Get("/status", [this](const Request &req, Response &res) {
+    this->GetSmartHubStatus(req, res);
+  });
+  server_->Get("/log", [this](const Request &req, Response &res) {
+    this->GetSmartHubLog(req, res);
   });
 
   server_->set_error_handler([](const Request & /*req*/, Response &res) {
@@ -34,11 +68,11 @@ bool HttpServer::Init(int port) {
     res.set_content(buf, "text/html");
   });
 
-  server_->set_logger([](const Request &req, const Response &res) {
-    LOG::Debug(TAG, "{}", log(req, res));
-  });
+  // server_->set_logger([](const Request &req, const Response &res) {
+  //   LOG::Debug(TAG, "{}", log(req, res));
+  // });
 
-   LOG::Warn(TAG, "Initialized");
+  LOG::Warn(TAG, "Initialized");
 
   return true;
 }
@@ -53,7 +87,7 @@ bool HttpServer::Start() {
   if (started) {
     LOG::Debug(TAG, "HttpServer Started");
   } else {
-    LOG::Warn(TAG, "Can not start HttpServer {}",server_->);
+    LOG::Warn(TAG, "Can not start HttpServer");
   }
   return started;
 }

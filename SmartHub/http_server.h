@@ -13,7 +13,12 @@ class HttpServer {
   void SetHubManager(HubManager *manager);
 
  private:
-  int port_=8083;
+    void SetSmartHubConfig(const httplib::Request &req, httplib::Response &resp);
+    void GetSmartHubStatus(const httplib::Request &req, httplib::Response &resp);
+    void GetSmartHubLog(const httplib::Request &req, httplib::Response &resp);
+
+ private:
+  int port_ = 8083;
   HubManager *hub_manager_{nullptr};
   std::unique_ptr<httplib::Server> server_;
 };

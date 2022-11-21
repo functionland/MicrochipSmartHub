@@ -12,6 +12,8 @@
 
 namespace SmartHub {
 
+static constexpr auto HUB_ERR=-1;
+
 enum HubControllerType{
     HUB_CONTL_I2C,
     HUB_CONTL_USB

@@ -38,10 +38,11 @@ void HubManager::Worker() {
     while (count++ < 10) {
       for (auto &hub : hubs_) {
         if (hub) {
-          hub->SetUsbVID(0x12, 0x34);
-          // hub->Revision();
-          hub->RetrieveUsbVID();
-          std::this_thread::sleep_for(std::chrono::seconds(1));
+          if (hub->SetUsbVID(0x12, 0x34) != HUB_ERR) {
+            // hub->Revision();
+            hub->RetrieveUsbVID();
+          }
+          std::this_thread::sleep_for(std::chrono::seconds(20));
         }
       }
     }
@@ -67,9 +68,9 @@ void HubManager::ResetAllHubs() {
 
 void HubManager::InitilizePorts() {
   for (int i = 0; i < 4; i++) {
-    auto usb = std::make_shared<Usbport>(USB_TYPE_3_DN, i);
+    auto usb = std::make_shared<Usbport>(USB_TYPE_3, i);
   }
-  auto usb = std::make_shared<Usbport>(USB_TYPE_2_DN, 5);
+  auto usb = std::make_shared<Usbport>(USB_TYPE_2, 5);
 }
 
 }  // namespace SmartHub
